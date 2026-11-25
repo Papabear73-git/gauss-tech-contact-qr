@@ -9,6 +9,8 @@
   const STORAGE_KEY = 'contact_qr_webapp_v1';
   const SAVED_LIST_KEY = 'contact_qr_saved_list_v1';
   const THEME_STORAGE_KEY = 'contact_qr_theme_v1';
+  const APP_VERSION = '1.3.0';
+  const APP_PUBLISHED = '25 Nov 2026, 20:47';
 
   const FIELD_IDS = [
     'prefix', 'firstName', 'middleName', 'lastName', 'nameSuffix', 'nickname',
@@ -1686,7 +1688,15 @@
     });
   }
 
+  function initFooter() {
+    const el = document.getElementById('app-version-text');
+    if (el) {
+      el.textContent = `v${APP_VERSION} · Published ${APP_PUBLISHED}`;
+    }
+  }
+
   // Initialize
+  initFooter();
   initPWA();
   initTheme();
   initViewMode();

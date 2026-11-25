@@ -418,79 +418,86 @@
             <div id="qr-output" class="qr-output" hidden></div>
           </div>
 
-          <div class="contact-summary" id="contact-summary">
-            <div class="summary-name" id="summary-name">New Contact</div>
-            <div class="summary-meta" id="summary-meta">0 fields populated</div>
-          </div>
-
-          <div class="compat-row">
-            <span class="compat-label">Phone target</span>
-            <div class="segmented" role="group" aria-label="Phone compatibility target">
-              <button type="button" class="seg-btn active" data-target="both">Both</button>
-              <button type="button" class="seg-btn" data-target="iphone">iPhone</button>
-              <button type="button" class="seg-btn" data-target="android">Android</button>
+          <div class="qr-card-right">
+            <div class="contact-summary" id="contact-summary">
+              <div class="summary-name" id="summary-name">New Contact</div>
+              <div class="summary-meta" id="summary-meta">0 fields populated</div>
             </div>
-          </div>
 
-          <div class="qr-metrics" id="qr-metrics">
-            <span id="metric-bytes">0 bytes</span>
-            <span aria-hidden="true">·</span>
-            <span id="metric-version">vCard 3.0</span>
-            <span aria-hidden="true">·</span>
-            <span id="metric-ecc">ECC M</span>
-          </div>
+            <div class="compat-row">
+              <span class="compat-label">Phone target</span>
+              <div class="segmented" role="group" aria-label="Phone compatibility target">
+                <button type="button" class="seg-btn active" data-target="both">Both</button>
+                <button type="button" class="seg-btn" data-target="iphone">iPhone</button>
+                <button type="button" class="seg-btn" data-target="android">Android</button>
+              </div>
+            </div>
 
-          <div class="qr-actions">
-            <button type="button" id="btn-download-png" class="btn btn-primary" disabled>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Download PNG
-            </button>
-            <button type="button" id="btn-download-svg" class="btn btn-secondary" disabled>
-              Download SVG
-            </button>
-            <button type="button" id="btn-download-vcf" class="btn btn-secondary" disabled>
-              Save .vcf
-            </button>
-            <button type="button" id="btn-copy-vcard" class="btn btn-secondary" disabled>
-              Copy vCard
-            </button>
+            <div class="qr-metrics" id="qr-metrics">
+              <span id="metric-bytes">0 bytes</span>
+              <span aria-hidden="true">·</span>
+              <span id="metric-version">vCard 3.0</span>
+              <span aria-hidden="true">·</span>
+              <span id="metric-ecc">ECC M</span>
+            </div>
+
+            <div class="qr-actions">
+              <button type="button" id="btn-download-png" class="btn btn-primary" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download PNG
+              </button>
+              <button type="button" id="btn-download-svg" class="btn btn-secondary" disabled>
+                Download SVG
+              </button>
+              <button type="button" id="btn-download-vcf" class="btn btn-secondary" disabled>
+                Save .vcf
+              </button>
+              <button type="button" id="btn-copy-vcard" class="btn btn-secondary" disabled>
+                Copy vCard
+              </button>
+            </div>
           </div>
         </div>
 
-        <!-- Phone Contact Preview -->
-        <section class="phone-preview-card" aria-labelledby="phone-preview-title">
-          <div class="phone-preview-head">
-            <div>
-              <h2 id="phone-preview-title">Phone contact preview</h2>
-              <p>How it looks after saving</p>
-            </div>
-            <div class="preview-head-controls">
-              <div class="segmented" role="group" aria-label="Preview phone OS">
-                <button type="button" class="os-btn active" data-os="iphone">iPhone</button>
-                <button type="button" class="os-btn" data-os="android">Android</button>
-              </div>
-              <div class="segmented" role="group" aria-label="Preview color theme">
-                <button type="button" class="preview-theme-btn active" data-prev-theme="light" title="Preview in Light Mode">Light</button>
-                <button type="button" class="preview-theme-btn" data-prev-theme="dark" title="Preview in Dark Mode">Dark</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="phone-frame" id="phone-frame" data-os="iphone" data-preview-theme="light">
-            <div class="phone-statusbar">
-              <span class="sb-time" id="sb-time">9:41</span>
-              <span class="sb-notch" aria-hidden="true"></span>
-              <span class="sb-icons" aria-hidden="true">
-                <svg viewBox="0 0 16 12" fill="currentColor"><rect x="1" y="7" width="2.2" height="4" rx="0.6"/><rect x="4.5" y="5" width="2.2" height="6" rx="0.6"/><rect x="8" y="3" width="2.2" height="8" rx="0.6"/><rect x="11.5" y="1" width="2.2" height="10" rx="0.6"/></svg>
-                <svg viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="1" y="2" width="13.5" height="8" rx="2"/><rect x="2.6" y="3.6" width="9.5" height="4.8" rx="0.8" fill="currentColor" stroke="none"/><path d="M15.8 4.5v3" stroke-linecap="round"/></svg>
-              </span>
-            </div>
-            <div class="phone-screen" id="phone-screen"></div>
-            <div class="phone-home-bar" aria-hidden="true"><span></span></div>
-          </div>
-        </section>
       </aside>
+
+      <!-- Phone Contact Preview -->
+      <section class="phone-preview-card" aria-labelledby="phone-preview-title">
+        <div class="phone-preview-head">
+          <div>
+            <h2 id="phone-preview-title">Phone contact preview</h2>
+            <p>How it looks after saving</p>
+          </div>
+          <div class="preview-head-controls">
+            <div class="segmented" role="group" aria-label="Preview phone OS">
+              <button type="button" class="os-btn active" data-os="iphone">iPhone</button>
+              <button type="button" class="os-btn" data-os="android">Android</button>
+            </div>
+            <div class="segmented" role="group" aria-label="Preview color theme">
+              <button type="button" class="preview-theme-btn active" data-prev-theme="light" title="Preview in Light Mode">Light</button>
+              <button type="button" class="preview-theme-btn" data-prev-theme="dark" title="Preview in Dark Mode">Dark</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="phone-frame" id="phone-frame" data-os="iphone" data-preview-theme="light">
+          <div class="phone-statusbar">
+            <span class="sb-time" id="sb-time">9:41</span>
+            <span class="sb-notch" aria-hidden="true"></span>
+            <span class="sb-icons" aria-hidden="true">
+              <svg viewBox="0 0 16 12" fill="currentColor"><rect x="1" y="7" width="2.2" height="4" rx="0.6"/><rect x="4.5" y="5" width="2.2" height="6" rx="0.6"/><rect x="8" y="3" width="2.2" height="8" rx="0.6"/><rect x="11.5" y="1" width="2.2" height="10" rx="0.6"/></svg>
+              <svg viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="1" y="2" width="13.5" height="8" rx="2"/><rect x="2.6" y="3.6" width="9.5" height="4.8" rx="0.8" fill="currentColor" stroke="none"/><path d="M15.8 4.5v3" stroke-linecap="round"/></svg>
+            </span>
+          </div>
+          <div class="phone-screen" id="phone-screen"></div>
+          <div class="phone-home-bar" aria-hidden="true"><span></span></div>
+        </div>
+      </section>
     </main>
+
+    <footer class="app-footer">
+      <span id="app-version-text"></span>
+    </footer>
   </div>
 
   <!-- Raw vCard Inspector Modal -->

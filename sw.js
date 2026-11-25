@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gauss-contact-qr-v1';
+const CACHE_NAME = 'gauss-contact-qr-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

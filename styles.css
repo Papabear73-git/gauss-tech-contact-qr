@@ -240,9 +240,15 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
 .workspace {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-rows: auto auto;
   gap: 12px;
   align-items: start;
 }
+
+/* Explicit placement so phone-preview-card stacks under qr-panel in col 2 */
+.form-grid        { grid-column: 1; grid-row: 1 / 3; }
+.qr-panel         { grid-column: 2; grid-row: 1; }
+.phone-preview-card { grid-column: 2; grid-row: 2; }
 
 .form-grid {
   display: grid;
@@ -489,6 +495,12 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
   border-radius: var(--radius-lg);
   padding: 12px 14px 13px;
   box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.qr-card-right {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -867,6 +879,12 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
   border-radius: var(--radius-lg);
   padding: 12px 13px 14px;
   box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.qr-card-right {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -1286,6 +1304,11 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
 }
 
 /* Responsive adjustments */
+/* ══════════════════════════════════════════════════
+   RESPONSIVE — tablet / mobile
+   ══════════════════════════════════════════════════ */
+
+/* ── 1180px: narrow desktop ── */
 @media (max-width: 1180px) {
   .workspace {
     grid-template-columns: minmax(0, 1fr) 300px;
@@ -1296,40 +1319,30 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
   }
 }
 
+/* ── 980px: tablet / stacked ── */
 @media (max-width: 980px) {
-  /* Stack vertically: QR panel on top, form below */
   .workspace {
+    /* Single-column flex: QR top → Form middle → Preview bottom */
     display: flex;
     flex-direction: column;
+    align-items: stretch;
     gap: 12px;
   }
 
-  /* QR panel appears first (above the form) */
-  .qr-panel {
-    order: -1;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    position: static; /* never sticky — form must be reachable */
+  /* Reset explicit grid placement and stretch full width */
+  .form-grid, .qr-panel, .phone-preview-card {
+    grid-column: unset;
+    grid-row: unset;
+    width: 100%;
   }
 
-  /* Phone preview: side-by-side with QR card when space allows */
-  .qr-panel {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-  }
+  /* Order: 1=QR, 2=Form, 3=Preview */
+  .qr-panel           { order: 1; }
+  .form-grid          { order: 2; }
+  .phone-preview-card { order: 3; }
 
-  /* Form comes after QR panel */
-  .form-grid {
-    order: 1;
-  }
-
-  /* All group cards span full width */
-  .span-4,
-  .span-6 {
-    grid-column: span 12;
-  }
+  /* All form group cards span full width */
+  .span-4, .span-6 { grid-column: span 12; }
 
   .addresses-split,
   .addresses-3 {
@@ -1337,64 +1350,114 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
   }
 }
 
+/* ── 768px: mobile — QR compact, form scrolls, preview at bottom ── */
 @media (max-width: 768px) {
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
   .app-shell {
-    padding: 8px 10px 18px;
-  }
-
-  .field input,
-  .field textarea {
-    font-size: 16px;
-  }
-
-  .field input {
-    height: 38px;
-  }
-
-  .date-picker-overlay {
-    width: 36px !important;
-    height: 36px !important;
-  }
-
-  .btn,
-  .saved-select {
-    height: 36px;
-  }
-}
-
-@media (max-width: 660px) {
-  .qr-panel {
-    grid-template-columns: minmax(0, 1fr);
+    height: 100vh;  /* fallback for older browsers */
+    height: 100dvh;
+    min-height: unset;
+    overflow: hidden;
+    padding: 6px 8px 0;
+    gap: 6px;
   }
 
   .topbar {
-    flex-direction: column;
-    align-items: stretch;
+    flex-shrink: 0;
+    padding: 6px 10px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
   }
 
-  .topbar-actions {
-    justify-content: flex-start;
-  }
-
-  .saved-group {
-    width: 100%;
-    border-right: none;
-    padding-right: 0;
-    margin-right: 0;
-  }
-
-  .saved-select {
+  .workspace {
     flex: 1;
-    max-width: none;
-    min-width: 0;
+    min-height: 0;      /* crucial: allows children to shrink below content size */
+    overflow: hidden;
+    gap: 6px;
   }
 
-  .cols-name,
-  .cols-3,
-  .cols-2,
-  .cols-addr {
-    grid-template-columns: minmax(0, 1fr);
+  /* ── QR panel: compact strip at top ── */
+  .qr-panel {
+    flex-shrink: 0;
   }
+
+  .qr-card {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    align-items: center;
+    gap: 5px 10px;
+    padding: 7px 9px;
+  }
+
+  /* QR image: smaller but still scannable (112px) */
+  .qr-stage {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    width: 112px;
+    min-width: 112px;
+    max-width: 112px;
+    aspect-ratio: 1;
+    padding: 4px;
+    margin: 0;
+  }
+
+  .qr-card-header {
+    grid-column: 2;
+    grid-row: 1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .qr-card-header h2 { font-size: 12.5px; }
+
+  /* Right side of QR card: summary + actions */
+  .qr-card-right {
+    grid-column: 2;
+    grid-row: 2;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  /* Hide verbose elements to save vertical space */
+  .compat-row,
+  .qr-metrics,
+  #qr-subtitle { display: none; }
+
+  .contact-summary { padding: 4px 8px; }
+  .summary-name { font-size: 12px; }
+  .summary-meta { font-size: 10px; }
+
+  .qr-actions {
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+  }
+  #btn-download-png { grid-column: span 2; font-size: 11px; height: 27px; }
+  .qr-actions .btn-secondary { font-size: 10.5px; height: 25px; padding: 0 5px; }
+
+  /* ── Form: takes all remaining space, scrolls ── */
+  .form-grid {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    align-content: start;
+    padding-bottom: 10px;
+    width: 100%;
+  }
+
+  /* Full-width fields on mobile */
+  .cols-name  { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cols-3     { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cols-2     { grid-template-columns: minmax(0, 1fr); }
+  .cols-addr  { grid-template-columns: minmax(0, 1fr); }
 
   .col-span-2,
   .col-span-3,
@@ -1402,171 +1465,79 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
   .addr-city,
   .addr-state,
   .addr-postcode,
-  .addr-country {
-    grid-column: span 1;
+  .addr-country { grid-column: span 1; }
+
+  .field input,
+  .field textarea { font-size: 16px; width: 100%; } /* prevents iOS zoom on focus */
+  .field input    { height: 38px; }
+
+  /* ── Phone preview: compact strip at bottom ── */
+  .phone-preview-card {
+    flex-shrink: 0;
+    max-height: 28vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 6px 10px;
+  }
+
+  .phone-preview-head { margin-bottom: 4px; }
+  .phone-preview-head h2 { font-size: 12px; }
+  .phone-preview-head p  { display: none; }
+
+  .phone-frame {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 14px;
+  }
+
+  .phone-screen { min-height: 90px; }
+
+  /* ── Footer ── */
+  .app-footer {
+    flex-shrink: 0;
+    padding: 3px 0 5px;
+    margin-top: 0;
+    text-align: center;
+  }
+
+  .date-picker-overlay {
+    width: 36px !important;
+    height: 36px !important;
   }
 }
 
-/* ═══════════════════════════════════════════
-   PREVIEW THEME: DARK MODE FOR IPHONE & ANDROID
-   ═══════════════════════════════════════════ */
+/* ── 660px: very small phones — topbar compact ── */
+@media (max-width: 660px) {
+  .topbar {
+    padding: 5px 8px;
+  }
+  .topbar-actions { gap: 4px; }
 
-/* iPhone — dark */
-.phone-frame[data-preview-theme="dark"] .phone-statusbar {
-  background: #1c1c1e;
-  color: #ffffff;
+  .saved-group {
+    border-right: none;
+    padding-right: 0;
+    margin-right: 0;
+  }
+
+  .saved-select {
+    max-width: 130px;
+    min-width: 100px;
+  }
 }
 
-.phone-frame[data-preview-theme="dark"] .sb-notch {
-  background: #000000;
+/* App Footer */
+.app-footer {
+  text-align: center;
+  font-size: 10.5px;
+  color: var(--text-soft);
+  padding: 6px 0 10px;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+  flex-shrink: 0;
 }
-
-.phone-frame[data-preview-theme="dark"] .phone-screen {
-  background: #000000;
-  color: #ffffff;
-}
-
-.phone-frame[data-preview-theme="dark"] .phone-home-bar {
-  background: #1c1c1e;
-}
-
-.phone-frame[data-preview-theme="dark"] .phone-home-bar span {
-  background: rgba(255,255,255,0.3);
-}
-
-/* iPhone dark — contact UI overrides */
-.phone-frame[data-preview-theme="dark"] .ios-name {
-  color: #ffffff;
-}
-
-.phone-frame[data-preview-theme="dark"] .ios-sub,
-.phone-frame[data-preview-theme="dark"] .ios-nickname {
-  color: #aeaeb2;
-}
-
-.phone-frame[data-preview-theme="dark"] .ios-act-btn {
-  background: #1c1c1e;
-  color: #0a84ff;
-}
-
-.phone-frame[data-preview-theme="dark"] .ios-act-btn.is-muted {
-  color: #636366;
-}
-
-.phone-frame[data-preview-theme="dark"] .ios-group {
-  background: #1c1c1e;
-}
-
-.phone-frame[data-preview-theme="dark"] .ios-row {
-  border-bottom-color: #3a3a3c;
-}
-
-.phone-frame[data-preview-theme="dark"] .ios-row-label {
-  color: #aeaeb2;
-}
-
-.phone-frame[data-preview-theme="dark"] .ios-row-val {
-  color: #0a84ff;
-}
-
-.phone-frame[data-preview-theme="dark"] .ios-row-val.is-plain {
-  color: #ffffff;
-}
-
-.phone-frame[data-preview-theme="dark"] .phone-empty-note {
-  background: #1c1c1e;
-  border-color: #3a3a3c;
-  color: #8e8e93;
-}
-
-.phone-frame[data-preview-theme="dark"] .phone-omitted-note {
-  background: #2c2200;
-  border-color: #6b4e00;
-  color: #ffd060;
-}
-
-/* Android — dark */
-.phone-frame[data-os="android"][data-preview-theme="dark"] .phone-statusbar {
-  background: #121316;
-  color: #e3e3e3;
-}
-
-.phone-frame[data-os="android"][data-preview-theme="dark"] .sb-notch {
-  background: #e3e3e3;
-}
-
-.phone-frame[data-os="android"][data-preview-theme="dark"] .phone-screen {
-  background: #121316;
-  color: #e3e3e3;
-}
-
-.phone-frame[data-os="android"][data-preview-theme="dark"] .phone-home-bar {
-  background: #121316;
-}
-
-.phone-frame[data-os="android"][data-preview-theme="dark"] .phone-home-bar span {
-  background: rgba(255,255,255,0.22);
-}
-
-/* Android dark — contact UI overrides */
-.phone-frame[data-os="android"][data-preview-theme="dark"] .and-edit-title {
-  color: #e3e3e3;
-}
-
-.phone-frame[data-os="android"][data-preview-theme="dark"] .and-edit-header {
-  color: #9aa0a6;
-}
-
-.phone-frame[data-os="android"][data-preview-theme="dark"] .and-save-btn {
-  background: #004a77;
-  color: #9ecaff;
-}
-
-.phone-frame[data-os="android"][data-preview-theme="dark"] .and-edit-card {
-  background: #1e1f22;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-}
-
-.phone-frame[data-os="android"][data-preview-theme="dark"] .and-input-line {
-  border-bottom-color: #3c4043;
-}
-
-.phone-frame[data-os="android"][data-preview-theme="dark"] .and-input-label-tag {
-  color: #9ecaff;
-}
-
-.phone-frame[data-os="android"][data-preview-theme="dark"] .and-input-val {
-  color: #e3e3e3;
-}
-
-.phone-frame[data-os="android"][data-preview-theme="dark"] .and-add-more-row {
-  color: #57bb8a;
-}
-
-.phone-frame[data-os="android"][data-preview-theme="dark"] .and-collapsed-section {
-  background: #1e1f22;
-  color: #bdc1c6;
-}
-
-.phone-frame[data-os="android"][data-preview-theme="dark"] .and-collapsed-section svg {
-  color: #bdc1c6;
-}
-
-.phone-frame[data-os="android"][data-preview-theme="dark"] .phone-empty-note {
-  background: #1e1f22;
-  border-color: #3c4043;
-  color: #9aa0a6;
-}
-
-.phone-frame[data-os="android"][data-preview-theme="dark"] .phone-omitted-note {
-  background: #2c2200;
-  border-color: #6b4e00;
-  color: #ffd060;
-}
-
-/* ═══════════════════════════════════════════
-   MOBILE: QR CODE ON TOP, FORM SCROLLS BELOW
-   ═══════════════════════════════════════════ */
 
 /* Print just the contact QR card cleanly */
 @media print {
@@ -1577,7 +1548,8 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
   .form-grid,
   .compat-row,
   .qr-actions,
-  .phone-preview-card {
+  .phone-preview-card,
+  .app-footer {
     display: none !important;
   }
   .workspace {
