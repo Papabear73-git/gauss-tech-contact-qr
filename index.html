@@ -53,6 +53,12 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
           vCard
         </button>
+        <button type="button" id="btn-theme-toggle" class="btn btn-ghost btn-theme" title="Toggle dark/bright mode" aria-label="Toggle dark/bright mode">
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <span id="theme-btn-label">Dark</span>
+        </button>
+
         <button type="button" id="btn-clear" class="btn btn-danger-ghost" title="Clear all fields">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m5 0V4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2"/></svg>
           Clear
@@ -88,26 +94,34 @@
               <input id="lastName" name="lastName" type="text" placeholder="Doe" autocomplete="family-name">
             </div>
             <div class="field">
-              <label for="nameSuffix">Name suffix</label>
+              <label for="nameSuffix">Suffix</label>
               <input id="nameSuffix" name="nameSuffix" type="text" placeholder="PhD" autocomplete="honorific-suffix">
             </div>
             <div class="field">
               <label for="nickname">Nickname</label>
               <input id="nickname" name="nickname" type="text" placeholder="Janie" autocomplete="nickname">
             </div>
+            <div class="field col-span-3">
+              <label for="phoneticFirstName">Phonetic first name</label>
+              <input id="phoneticFirstName" name="phoneticFirstName" type="text" placeholder="Jayn">
+            </div>
+            <div class="field col-span-3">
+              <label for="phoneticLastName">Phonetic last name</label>
+              <input id="phoneticLastName" name="phoneticLastName" type="text" placeholder="Doh">
+            </div>
           </div>
         </section>
 
         <!-- Group 2: Phone numbers -->
-        <section class="group-card span-4" aria-labelledby="grp-phones">
+        <section class="group-card span-6" aria-labelledby="grp-phones">
           <div class="group-header">
             <h2 id="grp-phones" class="group-title">
               <span class="group-badge">2</span>
               Phone numbers
             </h2>
           </div>
-          <div class="fields-row cols-2">
-            <div class="field col-span-2">
+          <div class="fields-row cols-3">
+            <div class="field">
               <label for="mobilePhone">Mobile phone</label>
               <input id="mobilePhone" name="mobilePhone" type="tel" placeholder="+1 555 234 5678" autocomplete="tel">
             </div>
@@ -119,11 +133,31 @@
               <label for="homePhone">Home phone</label>
               <input id="homePhone" name="homePhone" type="tel" placeholder="+1 555 345 6789">
             </div>
+            <div class="field">
+              <label for="mainPhone">Main phone / Main</label>
+              <input id="mainPhone" name="mainPhone" type="tel" placeholder="+1 555 100 0000">
+            </div>
+            <div class="field">
+              <label for="workFax">Work fax</label>
+              <input id="workFax" name="workFax" type="tel" placeholder="+1 555 876 5430">
+            </div>
+            <div class="field">
+              <label for="homeFax">Home fax</label>
+              <input id="homeFax" name="homeFax" type="tel" placeholder="+1 555 345 6780">
+            </div>
+            <div class="field">
+              <label for="pagerPhone">Pager</label>
+              <input id="pagerPhone" name="pagerPhone" type="tel" placeholder="+1 555 900 1234">
+            </div>
+            <div class="field col-span-2">
+              <label for="otherPhone">Other phone / Other</label>
+              <input id="otherPhone" name="otherPhone" type="tel" placeholder="+1 555 456 7890">
+            </div>
           </div>
         </section>
 
         <!-- Group 3: Work details -->
-        <section class="group-card span-4" aria-labelledby="grp-work">
+        <section class="group-card span-6" aria-labelledby="grp-work">
           <div class="group-header">
             <h2 id="grp-work" class="group-title">
               <span class="group-badge">3</span>
@@ -132,14 +166,18 @@
           </div>
           <div class="fields-row cols-2">
             <div class="field">
-              <label for="title">Title</label>
+              <label for="title">Job title / Title</label>
               <input id="title" name="title" type="text" placeholder="Product Director" autocomplete="organization-title">
+            </div>
+            <div class="field">
+              <label for="role">Role</label>
+              <input id="role" name="role" type="text" placeholder="Executive Leader">
             </div>
             <div class="field">
               <label for="department">Department</label>
               <input id="department" name="department" type="text" placeholder="Engineering">
             </div>
-            <div class="field col-span-2">
+            <div class="field">
               <label for="company">Company</label>
               <input id="company" name="company" type="text" placeholder="Acme Corporation" autocomplete="organization">
             </div>
@@ -147,21 +185,25 @@
         </section>
 
         <!-- Group 4: E-mail addresses -->
-        <section class="group-card span-4" aria-labelledby="grp-emails">
+        <section class="group-card span-6" aria-labelledby="grp-emails">
           <div class="group-header">
             <h2 id="grp-emails" class="group-title">
               <span class="group-badge">4</span>
               E-mail addresses
             </h2>
           </div>
-          <div class="fields-row cols-1">
+          <div class="fields-row cols-3">
             <div class="field">
-              <label for="workEmail">Work e-mail address</label>
+              <label for="workEmail">Work e-mail</label>
               <input id="workEmail" name="workEmail" type="email" placeholder="jane.doe@acme.com" autocomplete="email">
             </div>
             <div class="field">
-              <label for="privateEmail">Private e-mail address</label>
+              <label for="privateEmail">Home e-mail</label>
               <input id="privateEmail" name="privateEmail" type="email" placeholder="jane.doe@gmail.com">
+            </div>
+            <div class="field">
+              <label for="otherEmail">Other e-mail / Other</label>
+              <input id="otherEmail" name="otherEmail" type="email" placeholder="contact@janedoe.org">
             </div>
           </div>
         </section>
@@ -173,11 +215,13 @@
               <span class="group-badge">5</span>
               Addresses
             </h2>
-            <button type="button" id="btn-copy-address" class="mini-link-btn" title="Copy Work address fields into Private address">
-              Copy work to private
-            </button>
+            <div class="addr-actions">
+              <button type="button" id="btn-copy-address" class="mini-link-btn" title="Copy Work address fields into Home address">
+                Copy work to home
+              </button>
+            </div>
           </div>
-          <div class="addresses-split">
+          <div class="addresses-split addresses-3">
             <fieldset class="sub-group">
               <legend>Work address</legend>
               <div class="fields-row cols-addr">
@@ -205,7 +249,7 @@
             </fieldset>
 
             <fieldset class="sub-group">
-              <legend>Private address</legend>
+              <legend>Home address</legend>
               <div class="fields-row cols-addr">
                 <div class="field addr-street">
                   <label for="privateStreet">Street</label>
@@ -229,6 +273,32 @@
                 </div>
               </div>
             </fieldset>
+
+            <fieldset class="sub-group">
+              <legend>Other address / Other</legend>
+              <div class="fields-row cols-addr">
+                <div class="field addr-street">
+                  <label for="otherStreet">Street</label>
+                  <input id="otherStreet" name="otherStreet" type="text" placeholder="12 Pine Mountain Rd">
+                </div>
+                <div class="field addr-city">
+                  <label for="otherCity">City</label>
+                  <input id="otherCity" name="otherCity" type="text" placeholder="Tahoe City">
+                </div>
+                <div class="field addr-state">
+                  <label for="otherState">State</label>
+                  <input id="otherState" name="otherState" type="text" placeholder="CA">
+                </div>
+                <div class="field addr-postcode">
+                  <label for="otherPostcode">Postcode</label>
+                  <input id="otherPostcode" name="otherPostcode" type="text" placeholder="96145">
+                </div>
+                <div class="field addr-country">
+                  <label for="otherCountry">Country</label>
+                  <input id="otherCountry" name="otherCountry" type="text" placeholder="USA">
+                </div>
+              </div>
+            </fieldset>
           </div>
         </section>
 
@@ -242,7 +312,7 @@
           </div>
           <div class="fields-row cols-2">
             <div class="field">
-              <label for="birthdate">Birthdate</label>
+              <label for="birthdate">Birthday</label>
               <input id="birthdate" name="birthdate" type="date">
             </div>
             <div class="field">
@@ -272,8 +342,24 @@
               <input id="workWebsite" name="workWebsite" type="url" placeholder="https://acme.com">
             </div>
             <div class="field">
-              <label for="privateWebsite">Private website</label>
+              <label for="privateWebsite">Home website</label>
               <input id="privateWebsite" name="privateWebsite" type="url" placeholder="https://janedoe.dev">
+            </div>
+          </div>
+        </section>
+
+        <!-- Group 8: Notes -->
+        <section class="group-card span-12" aria-labelledby="grp-notes">
+          <div class="group-header">
+            <h2 id="grp-notes" class="group-title">
+              <span class="group-badge">8</span>
+              Notes / Note
+            </h2>
+          </div>
+          <div class="fields-row cols-1">
+            <div class="field">
+              <label for="notes">Notes / Note</label>
+              <textarea id="notes" name="notes" rows="2" placeholder="Key contact person for Q3 enterprise projects. Met at Munich Summit."></textarea>
             </div>
           </div>
         </section>

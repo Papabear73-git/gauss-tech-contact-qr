@@ -8,16 +8,20 @@
 
   const STORAGE_KEY = 'contact_qr_webapp_v1';
   const SAVED_LIST_KEY = 'contact_qr_saved_list_v1';
+  const THEME_STORAGE_KEY = 'contact_qr_theme_v1';
 
   const FIELD_IDS = [
     'prefix', 'firstName', 'middleName', 'lastName', 'nameSuffix', 'nickname',
-    'mobilePhone', 'workPhone', 'homePhone',
-    'title', 'department', 'company',
-    'workEmail', 'privateEmail',
+    'phoneticFirstName', 'phoneticLastName',
+    'mobilePhone', 'workPhone', 'homePhone', 'mainPhone', 'workFax', 'homeFax', 'pagerPhone', 'otherPhone',
+    'title', 'role', 'department', 'company',
+    'workEmail', 'privateEmail', 'otherEmail',
     'workStreet', 'workCity', 'workState', 'workPostcode', 'workCountry',
     'privateStreet', 'privateCity', 'privateState', 'privatePostcode', 'privateCountry',
+    'otherStreet', 'otherCity', 'otherState', 'otherPostcode', 'otherCountry',
     'birthdate', 'nameDay',
-    'workWebsite', 'privateWebsite'
+    'workWebsite', 'privateWebsite',
+    'notes'
   ];
 
   const SAMPLE_DATA = {
@@ -27,14 +31,23 @@
     lastName: 'Doe',
     nameSuffix: 'PhD',
     nickname: 'Janie',
+    phoneticFirstName: 'Jayn',
+    phoneticLastName: 'Doh',
     mobilePhone: '+1 555 234 5678',
     workPhone: '+1 555 876 5432',
     homePhone: '+1 555 345 6789',
+    mainPhone: '+1 555 100 0000',
+    workFax: '+1 555 876 5430',
+    homeFax: '+1 555 345 6780',
+    pagerPhone: '+1 555 900 1234',
+    otherPhone: '+1 555 456 7890',
     title: 'Product Director',
+    role: 'Executive Leader',
     department: 'Engineering',
     company: 'Acme Corporation',
     workEmail: 'jane.doe@acme.com',
     privateEmail: 'jane.doe@example.com',
+    otherEmail: 'contact@janedoe.org',
     workStreet: '100 Innovation Way, Suite 400',
     workCity: 'San Francisco',
     workState: 'CA',
@@ -45,10 +58,16 @@
     privateState: 'CA',
     privatePostcode: '94612',
     privateCountry: 'USA',
+    otherStreet: '12 Pine Mountain Rd',
+    otherCity: 'Tahoe City',
+    otherState: 'CA',
+    otherPostcode: '96145',
+    otherCountry: 'USA',
     birthdate: '1990-05-14',
     nameDay: '05-12',
     workWebsite: 'https://acme.com',
-    privateWebsite: 'https://janedoe.dev'
+    privateWebsite: 'https://janedoe.dev',
+    notes: 'Key contact person for Q3 enterprise projects. Met at Munich Summit.'
   };
 
   let compatTarget = 'both'; // 'both' | 'iphone' | 'android'
@@ -85,6 +104,8 @@
   const btnCloseModal = document.getElementById('btn-close-modal');
   const btnModalClose = document.getElementById('btn-modal-close');
   const btnModalCopy = document.getElementById('btn-modal-copy');
+  const btnThemeToggle = document.getElementById('btn-theme-toggle');
+  const themeBtnLabel = document.getElementById('theme-btn-label');
 
   const segButtons = Array.from(document.querySelectorAll('.seg-btn'));
   const osButtons = Array.from(document.querySelectorAll('.os-btn'));
@@ -199,10 +220,22 @@
       lines.push(`NICKNAME:${escapeVCardValue(d.nickname)}`);
     }
 
+    if (d.phoneticFirstName) {
+      lines.push(`X-PHONETIC-FIRST-NAME:${escapeVCardValue(d.phoneticFirstName)}`);
+    }
+    if (d.phoneticLastName) {
+      lines.push(`X-PHONETIC-LAST-NAME:${escapeVCardValue(d.phoneticLastName)}`);
+    }
+
     // Group 2: Phone numbers
     if (d.mobilePhone) lines.push(`TEL;TYPE=CELL:${d.mobilePhone}`);
     if (d.workPhone) lines.push(`TEL;TYPE=WORK:${d.workPhone}`);
     if (d.homePhone) lines.push(`TEL;TYPE=HOME:${d.homePhone}`);
+    if (d.mainPhone) lines.push(`TEL;TYPE=MAIN:${d.mainPhone}`);
+    if (d.workFax) lines.push(`TEL;TYPE=WORK,FAX:${d.workFax}`);
+    if (d.homeFax) lines.push(`TEL;TYPE=HOME,FAX:${d.homeFax}`);
+    if (d.pagerPhone) lines.push(`TEL;TYPE=PAGER:${d.pagerPhone}`);
+    if (d.otherPhone) lines.push(`TEL;TYPE=VOICE:${d.otherPhone}`);
 
     // Group 3: Work details
     if (d.company || d.department) {
@@ -213,12 +246,16 @@
     if (d.title) {
       lines.push(`TITLE:${escapeVCardValue(d.title)}`);
     }
+    if (d.role) {
+      lines.push(`ROLE:${escapeVCardValue(d.role)}`);
+    }
 
     // Group 4: E-mail addresses
     if (d.workEmail) lines.push(`EMAIL;TYPE=WORK:${escapeVCardValue(d.workEmail)}`);
     if (d.privateEmail) lines.push(`EMAIL;TYPE=HOME:${escapeVCardValue(d.privateEmail)}`);
+    if (d.otherEmail) lines.push(`EMAIL;TYPE=OTHER:${escapeVCardValue(d.otherEmail)}`);
 
-    // Group 5: Addresses (Work & Private)
+    // Group 5: Addresses (Work, Home, Other)
     const hasWorkAddr = d.workStreet || d.workCity || d.workState || d.workPostcode || d.workCountry;
     if (hasWorkAddr) {
       const adr = ['', '', d.workStreet, d.workCity, d.workState, d.workPostcode, d.workCountry]
@@ -233,6 +270,14 @@
         .map(escapeVCardValue)
         .join(';');
       lines.push(`ADR;TYPE=HOME:${adr}`);
+    }
+
+    const hasOtherAddr = d.otherStreet || d.otherCity || d.otherState || d.otherPostcode || d.otherCountry;
+    if (hasOtherAddr) {
+      const adr = ['', '', d.otherStreet, d.otherCity, d.otherState, d.otherPostcode, d.otherCountry]
+        .map(escapeVCardValue)
+        .join(';');
+      lines.push(`ADR;TYPE=OTHER:${adr}`);
     }
 
     // Group 6: Dates
@@ -287,6 +332,11 @@
       } else {
         lines.push(`URL;TYPE=HOME:${url}`);
       }
+    }
+
+    // Group 8: Notes
+    if (d.notes) {
+      lines.push(`NOTE:${escapeVCardValue(d.notes)}`);
     }
 
     lines.push('END:VCARD');
@@ -411,9 +461,14 @@
     }
 
     const phoneRows = [];
-    if (d.mobilePhone) phoneRows.push(['mobile', d.mobilePhone, false]);
-    if (d.workPhone) phoneRows.push(['work', d.workPhone, false]);
-    if (d.homePhone) phoneRows.push(['home', d.homePhone, false]);
+    if (d.mobilePhone) phoneRows.push(['mobile', d.mobilePhone]);
+    if (d.workPhone) phoneRows.push(['work', d.workPhone]);
+    if (d.homePhone) phoneRows.push(['home', d.homePhone]);
+    if (d.mainPhone) phoneRows.push(['main', d.mainPhone]);
+    if (d.workFax) phoneRows.push(['work fax', d.workFax]);
+    if (d.homeFax) phoneRows.push(['home fax', d.homeFax]);
+    if (d.pagerPhone) phoneRows.push(['pager', d.pagerPhone]);
+    if (d.otherPhone) phoneRows.push(['other', d.otherPhone]);
     if (phoneRows.length) {
       html += `<div class="ios-group">${phoneRows.map(([l, v]) => `
         <div class="ios-row"><div class="ios-row-label">${escapeHtml(l)}</div><div class="ios-row-val">${escapeHtml(v)}</div></div>
@@ -423,6 +478,7 @@
     const emailRows = [];
     if (d.workEmail) emailRows.push(['work', d.workEmail]);
     if (d.privateEmail) emailRows.push(['home', d.privateEmail]);
+    if (d.otherEmail) emailRows.push(['other', d.otherEmail]);
     if (emailRows.length) {
       html += `<div class="ios-group">${emailRows.map(([l, v]) => `
         <div class="ios-row"><div class="ios-row-label">${escapeHtml(l)}</div><div class="ios-row-val">${escapeHtml(v)}</div></div>
@@ -440,13 +496,17 @@
 
     const workAddr = formatAddressLines(d.workStreet, d.workCity, d.workState, d.workPostcode, d.workCountry);
     const privAddr = formatAddressLines(d.privateStreet, d.privateCity, d.privateState, d.privatePostcode, d.privateCountry);
-    if (workAddr.length || privAddr.length) {
+    const otherAddr = formatAddressLines(d.otherStreet, d.otherCity, d.otherState, d.otherPostcode, d.otherCountry);
+    if (workAddr.length || privAddr.length || otherAddr.length) {
       html += `<div class="ios-group">`;
       if (workAddr.length) {
         html += `<div class="ios-row"><div class="ios-row-label">work</div><div class="ios-row-val is-plain">${workAddr.map(escapeHtml).join('<br>')}</div></div>`;
       }
       if (privAddr.length) {
         html += `<div class="ios-row"><div class="ios-row-label">home</div><div class="ios-row-val is-plain">${privAddr.map(escapeHtml).join('<br>')}</div></div>`;
+      }
+      if (otherAddr.length) {
+        html += `<div class="ios-row"><div class="ios-row-label">other</div><div class="ios-row-val is-plain">${otherAddr.map(escapeHtml).join('<br>')}</div></div>`;
       }
       html += `</div>`;
     }
@@ -455,10 +515,16 @@
     if (d.company) workRows.push(['company', d.company]);
     if (d.department) workRows.push(['department', d.department]);
     if (d.title) workRows.push(['job title', d.title]);
+    if (d.role) workRows.push(['role', d.role]);
     if (workRows.length) {
       html += `<div class="ios-group">${workRows.map(([l, v]) => `
         <div class="ios-row"><div class="ios-row-label">${escapeHtml(l)}</div><div class="ios-row-val is-plain">${escapeHtml(v)}</div></div>
       `).join('')}</div>`;
+    }
+
+    const phonetics = [d.phoneticFirstName, d.phoneticLastName].filter(Boolean).join(' ');
+    if (phonetics) {
+      html += `<div class="ios-group"><div class="ios-row"><div class="ios-row-label">pronunciation</div><div class="ios-row-val is-plain">${escapeHtml(phonetics)}</div></div></div>`;
     }
 
     const parsedNameDay = parseNameDay(d.nameDay);
@@ -474,8 +540,11 @@
       `).join('')}</div>`;
     }
 
-    if (nameDayInNotes) {
-      html += `<div class="ios-group"><div class="ios-row"><div class="ios-row-label">Notes</div><div class="ios-row-val is-plain">Name day: ${escapeHtml(parsedNameDay.raw)}</div></div></div>`;
+    const noteRows = [];
+    if (d.notes) noteRows.push(d.notes);
+    if (nameDayInNotes) noteRows.push(`Name day: ${parsedNameDay.raw}`);
+    if (noteRows.length) {
+      html += `<div class="ios-group"><div class="ios-row"><div class="ios-row-label">Notes</div><div class="ios-row-val is-plain">${escapeHtml(noteRows.join('\n\n'))}</div></div></div>`;
     }
 
     if (parsedNameDay && parsedNameDay.kind !== 'text' && compatTarget === 'android') {
@@ -486,104 +555,291 @@
   }
 
   function renderAndroidPreview(d, displayName, populatedCount) {
-    const initials = escapeHtml(getInitials(d, displayName));
-    const hasPhone = !!(d.mobilePhone || d.workPhone || d.homePhone);
-    const hasEmail = !!(d.workEmail || d.privateEmail);
-    const subtitle = [d.title, d.department, d.company].filter(Boolean).join(' · ');
-
-    const iconPhone = '<svg class="and-row-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 11.2 18.8 19.5 19.5 0 0 1 5.2 12.8 19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6.2 6.2l1.3-1.3a2 2 0 0 1 2.1-.5c.9.4 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>';
-    const iconMail = '<svg class="and-row-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,6 12,13 2,6"/></svg>';
-    const iconLink = '<svg class="and-row-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>';
-    const iconPin = '<svg class="and-row-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
-    const iconWork = '<svg class="and-row-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>';
-    const iconCal = '<svg class="and-row-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
-    const iconNote = '<svg class="and-row-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+    const iconUser = '<svg class="and-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+    const iconPhone = '<svg class="and-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 11.2 18.8 19.5 19.5 0 0 1 5.2 12.8 19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6.2 6.2l1.3-1.3a2 2 0 0 1 2.1-.5c.9.4 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>';
+    const iconWork = '<svg class="and-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>';
+    const iconMail = '<svg class="and-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,6 12,13 2,6"/></svg>';
+    const iconPin = '<svg class="and-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+    const iconCal = '<svg class="and-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+    const iconLink = '<svg class="and-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>';
+    const iconNote = '<svg class="and-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+    const iconGroup = '<svg class="and-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+    const iconRelation = '<svg class="and-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+    const iconPlus = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+    const iconChevronDown = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+    const iconChevronUp = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>';
 
     let html = `
-      <div class="and-topbar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        <div class="and-topbar-right">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"/></svg>
-          <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
-        </div>
-      </div>
-      <div class="and-hero">
-        <div class="and-avatar">${initials}</div>
-        <div class="and-name">${escapeHtml(displayName)}</div>
-        ${subtitle ? `<div class="and-sub">${escapeHtml(subtitle)}</div>` : ''}
-        ${d.nickname ? `<div class="and-nick-chip">Nickname: ${escapeHtml(d.nickname)}</div>` : ''}
-      </div>
-      <div class="and-actions">
-        <div class="and-act-btn ${hasPhone ? '' : 'is-muted'}">
-          <span class="and-act-circle"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15.5 15.5 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.24c1.1.36 2.3.56 3.6.56a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.6 21 3 13.4 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.3.2 2.5.56 3.6a1 1 0 0 1-.25 1l-2.21 2.2z"/></svg></span>
-          <span>Call</span>
-        </div>
-        <div class="and-act-btn ${hasPhone ? '' : 'is-muted'}">
-          <span class="and-act-circle"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg></span>
-          <span>Text</span>
-        </div>
-        <div class="and-act-btn ${hasPhone || hasEmail ? '' : 'is-muted'}">
-          <span class="and-act-circle"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4z"/></svg></span>
-          <span>Video</span>
-        </div>
-        <div class="and-act-btn ${hasEmail ? '' : 'is-muted'}">
-          <span class="and-act-circle"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg></span>
-          <span>Email</span>
-        </div>
+      <div class="and-edit-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <span class="and-edit-title">Create contact</span>
+        <span class="and-save-btn">Save</span>
       </div>
     `;
 
     if (populatedCount === 0) {
-      html += `<div class="phone-empty-note">Start typing on the left to see every field laid out on an Android Google Contacts screen.</div>`;
+      html += `<div class="phone-empty-note">Start typing on the left to see how Android Google Contacts lays out every field when importing this contact.</div>`;
       return html;
     }
 
-    const contactRows = [];
-    if (d.mobilePhone) contactRows.push([iconPhone, d.mobilePhone, 'Mobile', false]);
-    if (d.workPhone) contactRows.push([iconPhone, d.workPhone, 'Work', false]);
-    if (d.homePhone) contactRows.push([iconPhone, d.homePhone, 'Home', false]);
-    if (d.workEmail) contactRows.push([iconMail, d.workEmail, 'Work', true]);
-    if (d.privateEmail) contactRows.push([iconMail, d.privateEmail, 'Home', true]);
-    if (d.workWebsite) contactRows.push([iconLink, escapeUrlValue(d.workWebsite), 'Work website', true]);
-    if (d.privateWebsite) contactRows.push([iconLink, escapeUrlValue(d.privateWebsite), 'Home website', true]);
+    // Card 1: Name fields (Structured expanded)
+    const nameLines = [];
+    if (d.prefix) nameLines.push(d.prefix);
+    if (d.firstName) nameLines.push(d.firstName);
+    if (d.middleName) nameLines.push(d.middleName);
+    if (d.lastName) nameLines.push(d.lastName);
+    if (d.nameSuffix) nameLines.push(d.nameSuffix);
+    if (d.phoneticFirstName) nameLines.push(`Phonetic: ${d.phoneticFirstName}`);
+    if (d.phoneticLastName) nameLines.push(`Phonetic: ${d.phoneticLastName}`);
 
-    if (contactRows.length) {
-      html += `<div class="and-card"><div class="and-card-title">Contact info</div>${contactRows.map(([ic, val, lbl, isLink]) => `
-        <div class="and-row">${ic}<div class="and-row-body"><div class="and-row-val ${isLink ? 'is-link' : ''}">${escapeHtml(val)}</div><div class="and-row-lbl">${escapeHtml(lbl)}</div></div></div>
-      `).join('')}</div>`;
+    if (nameLines.length) {
+      html += `
+        <div class="and-edit-card">
+          <div class="and-card-row">
+            ${iconUser}
+            <div class="and-card-fields">
+              ${nameLines.map((v) => `
+                <div class="and-input-line">
+                  <div class="and-input-val">${escapeHtml(v)}</div>
+                </div>
+              `).join('')}
+            </div>
+            <div class="and-card-top-action">${iconChevronUp}</div>
+          </div>
+        </div>
+      `;
     }
 
-    const workAddr = formatAddressLines(d.workStreet, d.workCity, d.workState, d.workPostcode, d.workCountry);
-    const privAddr = formatAddressLines(d.privateStreet, d.privateCity, d.privateState, d.privatePostcode, d.privateCountry);
-    if (workAddr.length || privAddr.length) {
-      html += `<div class="and-card"><div class="and-card-title">Addresses</div>`;
-      if (workAddr.length) {
-        html += `<div class="and-row">${iconPin}<div class="and-row-body"><div class="and-row-val">${workAddr.map(escapeHtml).join('<br>')}</div><div class="and-row-lbl">Work</div></div></div>`;
-      }
-      if (privAddr.length) {
-        html += `<div class="and-row">${iconPin}<div class="and-row-body"><div class="and-row-val">${privAddr.map(escapeHtml).join('<br>')}</div><div class="and-row-lbl">Home</div></div></div>`;
-      }
-      html += `</div>`;
+    // Card 2: Nickname
+    if (d.nickname) {
+      html += `
+        <div class="and-edit-card">
+          <div class="and-card-row">
+            ${iconUser}
+            <div class="and-card-fields">
+              <div class="and-input-line">
+                <div class="and-input-val">${escapeHtml(d.nickname)}</div>
+                <div class="and-del-badge"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
     }
 
-    const aboutRows = [];
-    if (d.company) aboutRows.push([iconWork, d.company, 'Company']);
-    if (d.department) aboutRows.push([iconWork, d.department, 'Department']);
-    if (d.title) aboutRows.push([iconWork, d.title, 'Title']);
+    // Card 3: Phones
+    const phones = [];
+    if (d.mobilePhone) phones.push(['Mobile', d.mobilePhone]);
+    if (d.workPhone) phones.push(['Work', d.workPhone]);
+    if (d.homePhone) phones.push(['Home', d.homePhone]);
+    if (d.mainPhone) phones.push(['Main', d.mainPhone]);
+    if (d.workFax) phones.push(['Work fax', d.workFax]);
+    if (d.homeFax) phones.push(['Home fax', d.homeFax]);
+    if (d.pagerPhone) phones.push(['Pager', d.pagerPhone]);
+    if (d.otherPhone) phones.push(['Other', d.otherPhone]);
+
+    if (phones.length) {
+      html += `
+        <div class="and-edit-card">
+          <div class="and-card-row">
+            ${iconPhone}
+            <div class="and-card-fields">
+              ${phones.map(([lbl, val]) => `
+                <div class="and-input-line">
+                  <div style="flex:1">
+                    <div class="and-input-label-tag">${escapeHtml(lbl)} ${iconChevronDown}</div>
+                    <div class="and-input-val">${escapeHtml(val)}</div>
+                  </div>
+                  <div class="and-del-badge"></div>
+                </div>
+              `).join('')}
+              <div class="and-add-more-row">${iconPlus} Add phone number</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Card 4: Work details (Title, Role, Department, Company)
+    const workItems = [d.title, d.role, d.department, d.company].filter(Boolean);
+    if (workItems.length) {
+      html += `
+        <div class="and-edit-card">
+          <div class="and-card-row">
+            ${iconWork}
+            <div class="and-card-fields">
+              ${workItems.map((val, idx) => `
+                <div class="and-input-line">
+                  <div class="and-input-val">${escapeHtml(val)}</div>
+                  ${idx === 0 ? '<div class="and-del-badge"></div>' : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Card 5: Emails
+    const emails = [];
+    if (d.workEmail) emails.push(['Work', d.workEmail]);
+    if (d.privateEmail) emails.push(['Home', d.privateEmail]);
+    if (d.otherEmail) emails.push(['Other', d.otherEmail]);
+
+    if (emails.length) {
+      html += `
+        <div class="and-edit-card">
+          <div class="and-card-row">
+            ${iconMail}
+            <div class="and-card-fields">
+              ${emails.map(([lbl, val]) => `
+                <div class="and-input-line">
+                  <div style="flex:1">
+                    <div class="and-input-label-tag">${escapeHtml(lbl)} ${iconChevronDown}</div>
+                    <div class="and-input-val">${escapeHtml(val)}</div>
+                  </div>
+                  <div class="and-del-badge"></div>
+                </div>
+              `).join('')}
+              <div class="and-add-more-row">${iconPlus} Add email</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Card 6: Addresses (Work, Home, Other)
+    const addresses = [];
+    if (d.workStreet || d.workCity || d.workState || d.workPostcode || d.workCountry) {
+      addresses.push(['Work', [d.workStreet, d.workCity, d.workState, d.workPostcode, d.workCountry]]);
+    }
+    if (d.privateStreet || d.privateCity || d.privateState || d.privatePostcode || d.privateCountry) {
+      addresses.push(['Home', [d.privateStreet, d.privateCity, d.privateState, d.privatePostcode, d.privateCountry]]);
+    }
+    if (d.otherStreet || d.otherCity || d.otherState || d.otherPostcode || d.otherCountry) {
+      addresses.push(['Other', [d.otherStreet, d.otherCity, d.otherState, d.otherPostcode, d.otherCountry]]);
+    }
+
+    if (addresses.length) {
+      html += `
+        <div class="and-edit-card">
+          <div class="and-card-row">
+            ${iconPin}
+            <div class="and-card-fields">
+              ${addresses.map(([lbl, lines]) => `
+                <div class="and-input-line" style="flex-direction:column;align-items:flex-start">
+                  <div style="display:flex;align-items:center;width:100%">
+                    <div class="and-input-label-tag">${escapeHtml(lbl)} ${iconChevronDown}</div>
+                    <div class="and-del-badge"></div>
+                  </div>
+                  ${lines.filter(Boolean).map((ln) => `
+                    <div class="and-input-line" style="width:100%;padding:3px 0">
+                      <div class="and-input-val">${escapeHtml(ln)}</div>
+                    </div>
+                  `).join('')}
+                </div>
+              `).join('')}
+              <div class="and-add-more-row">${iconPlus} Add address</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Card 7: Important dates (Birthday & Name day)
     const parsedNameDay = parseNameDay(d.nameDay);
-    if (d.birthdate) aboutRows.push([iconCal, formatHumanDate(d.birthdate), 'Birthday']);
-    if (parsedNameDay && parsedNameDay.kind !== 'text' && compatTarget !== 'iphone') {
-      aboutRows.push([iconCal, formatNameDayDisplay(parsedNameDay), 'Name day']);
+    const dateEntries = [];
+    if (d.birthdate) {
+      dateEntries.push(['Birthday', formatHumanDate(d.birthdate)]);
     }
-    if (parsedNameDay && parsedNameDay.kind === 'text') {
-      aboutRows.push([iconNote, `Name day: ${parsedNameDay.raw}`, 'Notes']);
+    if (parsedNameDay && parsedNameDay.kind !== 'text' && compatTarget !== 'iphone') {
+      dateEntries.push(['Name day', formatNameDayDisplay(parsedNameDay)]);
     }
 
-    if (aboutRows.length) {
-      html += `<div class="and-card"><div class="and-card-title">About</div>${aboutRows.map(([ic, val, lbl]) => `
-        <div class="and-row">${ic}<div class="and-row-body"><div class="and-row-val">${escapeHtml(val)}</div><div class="and-row-lbl">${escapeHtml(lbl)}</div></div></div>
-      `).join('')}</div>`;
+    if (dateEntries.length) {
+      html += `
+        <div class="and-edit-card">
+          <div class="and-card-row">
+            ${iconCal}
+            <div class="and-card-fields">
+              ${dateEntries.map(([lbl, val]) => `
+                <div class="and-input-line">
+                  <div style="flex:1">
+                    <div class="and-input-label-tag">${escapeHtml(lbl)} ${iconChevronDown}</div>
+                    <div class="and-input-val" style="margin-top:2px;display:inline-block;padding:2px 10px;background:#2a2b2f;border-radius:12px">${escapeHtml(val)}</div>
+                  </div>
+                  <div class="and-del-badge"></div>
+                </div>
+              `).join('')}
+              <div class="and-add-more-row">${iconPlus} Add important date</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Collapsed Groups bar
+    html += `
+      <div class="and-collapsed-section">
+        ${iconGroup}
+        <span>Groups</span>
+      </div>
+    `;
+
+    // Card 8: Websites
+    const websites = [];
+    if (d.workWebsite) websites.push(escapeUrlValue(d.workWebsite));
+    if (d.privateWebsite) websites.push(escapeUrlValue(d.privateWebsite));
+
+    if (websites.length) {
+      html += `
+        <div class="and-edit-card">
+          <div class="and-card-row">
+            ${iconLink}
+            <div class="and-card-fields">
+              ${websites.map((url) => `
+                <div class="and-input-line">
+                  <div class="and-input-val">${escapeHtml(url)}</div>
+                  <div class="and-del-badge"></div>
+                </div>
+              `).join('')}
+              <div class="and-add-more-row">${iconPlus} Add website</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Collapsed Relationships bar
+    html += `
+      <div class="and-collapsed-section">
+        ${iconRelation}
+        <span>Relationships</span>
+      </div>
+    `;
+
+    // Card 9: Notes
+    if (d.notes || (parsedNameDay && parsedNameDay.kind === 'text')) {
+      const allNotes = [d.notes, (parsedNameDay && parsedNameDay.kind === 'text' ? `Name day: ${parsedNameDay.raw}` : '')].filter(Boolean).join('\n\n');
+      html += `
+        <div class="and-edit-card">
+          <div class="and-card-row">
+            ${iconNote}
+            <div class="and-card-fields">
+              <div class="and-input-line">
+                <div class="and-input-val">${escapeHtml(allNotes)}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      html += `
+        <div class="and-collapsed-section">
+          ${iconNote}
+          <span>Notes</span>
+        </div>
+      `;
     }
 
     if (parsedNameDay && parsedNameDay.kind !== 'text' && compatTarget === 'iphone') {
@@ -811,20 +1067,36 @@
         out.nickname = unescapeVCardValue(value).trim();
       } else if (propName === 'TITLE') {
         out.title = unescapeVCardValue(value).trim();
+      } else if (propName === 'ROLE') {
+        out.role = unescapeVCardValue(value).trim();
+      } else if (propName === 'X-PHONETIC-FIRST-NAME') {
+        out.phoneticFirstName = unescapeVCardValue(value).trim();
+      } else if (propName === 'X-PHONETIC-LAST-NAME') {
+        out.phoneticLastName = unescapeVCardValue(value).trim();
       } else if (propName === 'ORG') {
         const parts = splitUnescapedSemicolons(value).map(unescapeVCardValue);
         out.company = parts[0] || '';
         out.department = parts[1] || '';
       } else if (propName === 'TEL') {
         const cleanTel = unescapeVCardValue(value).trim();
-        if (paramsUpper.includes('CELL')) {
+        if (paramsUpper.includes('PAGER')) {
+          if (!out.pagerPhone) out.pagerPhone = cleanTel;
+        } else if (paramsUpper.includes('FAX')) {
+          if (paramsUpper.includes('HOME')) {
+            if (!out.homeFax) out.homeFax = cleanTel;
+          } else {
+            if (!out.workFax) out.workFax = cleanTel;
+          }
+        } else if (paramsUpper.includes('MAIN')) {
+          if (!out.mainPhone) out.mainPhone = cleanTel;
+        } else if (paramsUpper.includes('CELL')) {
           if (!out.mobilePhone) out.mobilePhone = cleanTel;
         } else if (paramsUpper.includes('WORK')) {
           if (!out.workPhone) out.workPhone = cleanTel;
         } else if (paramsUpper.includes('HOME')) {
           if (!out.homePhone) out.homePhone = cleanTel;
-        } else if (!out.mobilePhone) {
-          out.mobilePhone = cleanTel;
+        } else {
+          if (!out.otherPhone) out.otherPhone = cleanTel;
         }
       } else if (propName === 'EMAIL') {
         const cleanMail = unescapeVCardValue(value).trim();
@@ -832,10 +1104,14 @@
           if (!out.workEmail) out.workEmail = cleanMail;
         } else if (paramsUpper.includes('HOME')) {
           if (!out.privateEmail) out.privateEmail = cleanMail;
+        } else if (paramsUpper.includes('OTHER')) {
+          if (!out.otherEmail) out.otherEmail = cleanMail;
         } else if (!out.workEmail) {
           out.workEmail = cleanMail;
         } else if (!out.privateEmail) {
           out.privateEmail = cleanMail;
+        } else if (!out.otherEmail) {
+          out.otherEmail = cleanMail;
         }
       } else if (propName === 'ADR') {
         const parts = splitUnescapedSemicolons(value).map(unescapeVCardValue);
@@ -850,6 +1126,12 @@
           out.privateState = state;
           out.privatePostcode = postcode;
           out.privateCountry = country;
+        } else if (paramsUpper.includes('OTHER')) {
+          out.otherStreet = street;
+          out.otherCity = city;
+          out.otherState = state;
+          out.otherPostcode = postcode;
+          out.otherCountry = country;
         } else {
           // WORK or untyped ADR defaults to work address if empty
           if (!out.workStreet && !out.workCity && !out.workCountry) {
@@ -864,6 +1146,12 @@
             out.privateState = state;
             out.privatePostcode = postcode;
             out.privateCountry = country;
+          } else if (!out.otherStreet && !out.otherCity) {
+            out.otherStreet = street;
+            out.otherCity = city;
+            out.otherState = state;
+            out.otherPostcode = postcode;
+            out.otherCountry = country;
           }
         }
       } else if (propName === 'BDAY') {
@@ -899,6 +1187,8 @@
         const m = noteText.match(/^Name day:\s*(.+)$/i);
         if (m && !out.nameDay) {
           out.nameDay = m[1].trim();
+        } else {
+          out.notes = out.notes ? `${out.notes}\n${noteText}` : noteText;
         }
       }
     }
@@ -1269,7 +1559,42 @@
   });
   btnModalCopy.addEventListener('click', () => copyText(currentVCard, btnModalCopy, 'Copy text'));
 
+  // Theme Management (Light / Dark mode toggle with persistence)
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    if (themeBtnLabel) {
+      themeBtnLabel.textContent = theme === 'dark' ? 'Light mode' : 'Dark mode';
+    }
+    if (btnThemeToggle) {
+      btnThemeToggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+  }
+
+  function initTheme() {
+    let savedTheme = '';
+    try {
+      savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || '';
+    } catch (_) {}
+
+    if (!savedTheme) {
+      savedTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    applyTheme(savedTheme);
+
+    if (btnThemeToggle) {
+      btnThemeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        applyTheme(nextTheme);
+        try {
+          localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+        } catch (_) {}
+      });
+    }
+  }
+
   // Initialize
+  initTheme();
   renderSavedSelect('');
   loadFromLocalStorage();
   update();
