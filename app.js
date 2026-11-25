@@ -1593,7 +1593,48 @@
     }
   }
 
+  // PWA Service Worker & Install Prompt Handling
+  function initPWA() {
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch((err) => {
+          console.warn('PWA service worker registration failed:', err);
+        });
+      });
+    }
+
+    const btnInstallPwa = document.getElementById('btn-install-pwa');
+    let deferredPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (btnInstallPwa) {
+        btnInstallPwa.removeAttribute('hidden');
+      }
+    });
+
+    if (btnInstallPwa) {
+      btnInstallPwa.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          btnInstallPwa.setAttribute('hidden', '');
+        }
+        deferredPrompt = null;
+      });
+    }
+
+    window.addEventListener('appinstalled', () => {
+      if (btnInstallPwa) {
+        btnInstallPwa.setAttribute('hidden', '');
+      }
+    });
+  }
+
   // Initialize
+  initPWA();
   initTheme();
   renderSavedSelect('');
   loadFromLocalStorage();
