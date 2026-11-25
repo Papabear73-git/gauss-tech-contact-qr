@@ -242,7 +242,6 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
   grid-template-columns: minmax(0, 1fr) 320px;
   gap: 12px;
   align-items: start;
-  flex: 1;
 }
 
 .form-grid {
@@ -1298,16 +1297,35 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
 }
 
 @media (max-width: 980px) {
+  /* Stack vertically: QR panel on top, form below */
   .workspace {
-    grid-template-columns: minmax(0, 1fr);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 
+  /* QR panel appears first (above the form) */
+  .qr-panel {
+    order: -1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: static; /* never sticky — form must be reachable */
+  }
+
+  /* Phone preview: side-by-side with QR card when space allows */
   .qr-panel {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;
   }
 
+  /* Form comes after QR panel */
+  .form-grid {
+    order: 1;
+  }
+
+  /* All group cards span full width */
   .span-4,
   .span-6 {
     grid-column: span 12;
@@ -1547,42 +1565,8 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
 }
 
 /* ═══════════════════════════════════════════
-   MOBILE: QR CODE STICKY ON TOP, FORM SCROLLS
+   MOBILE: QR CODE ON TOP, FORM SCROLLS BELOW
    ═══════════════════════════════════════════ */
-
-@media (max-width: 980px) {
-  .workspace {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  /* QR panel moves to top; becomes sticky on scroll */
-  .qr-panel {
-    order: -1;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: var(--bg);
-    padding: 6px 0 2px;
-  }
-
-  /* Only the qr-card itself is "sticky-visible"; phone preview scrolls normally */
-  .qr-card {
-    position: sticky;
-    top: 6px;
-  }
-
-  /* Phone preview card scrolls inline — not sticky */
-  .phone-preview-card {
-    position: static;
-  }
-
-  /* Form comes after QR */
-  .form-grid {
-    order: 1;
-  }
-}
 
 /* Print just the contact QR card cleanly */
 @media print {
