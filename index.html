@@ -60,11 +60,28 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
           vCard
         </button>
-        <button type="button" id="btn-theme-toggle" class="btn btn-ghost btn-theme" title="Toggle dark/bright mode" aria-label="Toggle dark/bright mode">
-          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-          <span id="theme-btn-label">Dark</span>
-        </button>
+        <div class="view-mode-group" role="group" aria-label="Field detail level">
+          <button type="button" class="btn btn-ghost mode-btn active" id="btn-mode-simple" data-mode="simple" title="Show essential fields only">Simple</button>
+          <button type="button" class="btn btn-ghost mode-btn" id="btn-mode-advanced" data-mode="advanced" title="Show all fields">Advanced</button>
+        </div>
+
+        <div class="theme-controls-group" role="group" aria-label="Appearance controls">
+          <button type="button" id="btn-theme-ui" class="btn btn-ghost btn-theme" title="Toggle App UI dark/bright mode" aria-label="Toggle App UI dark/bright mode">
+            <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <span>UI: <strong id="ui-theme-label">Dark</strong></span>
+          </button>
+
+          <button type="button" id="btn-theme-preview" class="btn btn-ghost btn-theme" title="Toggle Phone Preview dark/bright mode" aria-label="Toggle Phone Preview dark/bright mode">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="3"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            <span>Phone: <strong id="preview-theme-label">Light</strong></span>
+          </button>
+
+          <button type="button" id="btn-theme-both" class="btn btn-ghost btn-theme" title="Toggle both App UI and Preview together" aria-label="Toggle both App UI and Preview together">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M12 2a10 10 0 0 1 0 20M12 2a10 10 0 0 0 0 20"/></svg>
+            <span>Both</span>
+          </button>
+        </div>
 
         <button type="button" id="btn-install-pwa" class="btn btn-ghost" title="Install as app on device" hidden>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -81,7 +98,7 @@
     <main class="workspace">
       <form id="contact-form" class="form-grid" novalidate autocomplete="on">
         <!-- Group 1: Name -->
-        <section class="group-card span-12" aria-labelledby="grp-name">
+        <section class="group-card span-12" id="group-card-name" aria-labelledby="grp-name">
           <div class="group-header">
             <h2 id="grp-name" class="group-title">
               <span class="group-badge">1</span>
@@ -89,7 +106,7 @@
             </h2>
           </div>
           <div class="fields-row cols-name">
-            <div class="field">
+            <div class="field" data-advanced-only>
               <label for="prefix">Prefix</label>
               <input id="prefix" name="prefix" type="text" placeholder="Dr." autocomplete="honorific-prefix">
             </div>
@@ -97,7 +114,7 @@
               <label for="firstName">First name</label>
               <input id="firstName" name="firstName" type="text" placeholder="Jane" autocomplete="given-name">
             </div>
-            <div class="field">
+            <div class="field" data-advanced-only>
               <label for="middleName">Middle name</label>
               <input id="middleName" name="middleName" type="text" placeholder="Marie" autocomplete="additional-name">
             </div>
@@ -105,19 +122,19 @@
               <label for="lastName">Last name</label>
               <input id="lastName" name="lastName" type="text" placeholder="Doe" autocomplete="family-name">
             </div>
-            <div class="field">
+            <div class="field" data-advanced-only>
               <label for="nameSuffix">Suffix</label>
               <input id="nameSuffix" name="nameSuffix" type="text" placeholder="PhD" autocomplete="honorific-suffix">
             </div>
-            <div class="field">
+            <div class="field" data-advanced-only>
               <label for="nickname">Nickname</label>
               <input id="nickname" name="nickname" type="text" placeholder="Janie" autocomplete="nickname">
             </div>
-            <div class="field col-span-3">
+            <div class="field col-span-3" data-advanced-only>
               <label for="phoneticFirstName">Phonetic first name</label>
               <input id="phoneticFirstName" name="phoneticFirstName" type="text" placeholder="Jayn">
             </div>
-            <div class="field col-span-3">
+            <div class="field col-span-3" data-advanced-only>
               <label for="phoneticLastName">Phonetic last name</label>
               <input id="phoneticLastName" name="phoneticLastName" type="text" placeholder="Doh">
             </div>
@@ -125,7 +142,7 @@
         </section>
 
         <!-- Group 2: Phone numbers -->
-        <section class="group-card span-6" aria-labelledby="grp-phones">
+        <section class="group-card span-6" id="group-card-phones" aria-labelledby="grp-phones">
           <div class="group-header">
             <h2 id="grp-phones" class="group-title">
               <span class="group-badge">2</span>
@@ -137,31 +154,31 @@
               <label for="mobilePhone">Mobile phone</label>
               <input id="mobilePhone" name="mobilePhone" type="tel" placeholder="+1 555 234 5678" autocomplete="tel">
             </div>
-            <div class="field">
+            <div class="field" data-advanced-only>
               <label for="workPhone">Work phone</label>
               <input id="workPhone" name="workPhone" type="tel" placeholder="+1 555 876 5432">
             </div>
-            <div class="field">
+            <div class="field" data-advanced-only>
               <label for="homePhone">Home phone</label>
               <input id="homePhone" name="homePhone" type="tel" placeholder="+1 555 345 6789">
             </div>
-            <div class="field">
+            <div class="field" data-advanced-only>
               <label for="mainPhone">Main phone / Main</label>
               <input id="mainPhone" name="mainPhone" type="tel" placeholder="+1 555 100 0000">
             </div>
-            <div class="field">
+            <div class="field" data-advanced-only>
               <label for="workFax">Work fax</label>
               <input id="workFax" name="workFax" type="tel" placeholder="+1 555 876 5430">
             </div>
-            <div class="field">
+            <div class="field" data-advanced-only>
               <label for="homeFax">Home fax</label>
               <input id="homeFax" name="homeFax" type="tel" placeholder="+1 555 345 6780">
             </div>
-            <div class="field">
+            <div class="field" data-advanced-only>
               <label for="pagerPhone">Pager</label>
               <input id="pagerPhone" name="pagerPhone" type="tel" placeholder="+1 555 900 1234">
             </div>
-            <div class="field col-span-2">
+            <div class="field col-span-2" data-advanced-only>
               <label for="otherPhone">Other phone / Other</label>
               <input id="otherPhone" name="otherPhone" type="tel" placeholder="+1 555 456 7890">
             </div>
@@ -169,7 +186,7 @@
         </section>
 
         <!-- Group 3: Work details -->
-        <section class="group-card span-6" aria-labelledby="grp-work">
+        <section class="group-card span-6" id="group-card-work" aria-labelledby="grp-work">
           <div class="group-header">
             <h2 id="grp-work" class="group-title">
               <span class="group-badge">3</span>
@@ -181,7 +198,7 @@
               <label for="title">Job title / Title</label>
               <input id="title" name="title" type="text" placeholder="Product Director" autocomplete="organization-title">
             </div>
-            <div class="field">
+            <div class="field" data-advanced-only>
               <label for="role">Role</label>
               <input id="role" name="role" type="text" placeholder="Executive Leader">
             </div>
@@ -197,7 +214,7 @@
         </section>
 
         <!-- Group 4: E-mail addresses -->
-        <section class="group-card span-6" aria-labelledby="grp-emails">
+        <section class="group-card span-6" id="group-card-emails" aria-labelledby="grp-emails">
           <div class="group-header">
             <h2 id="grp-emails" class="group-title">
               <span class="group-badge">4</span>
@@ -209,11 +226,11 @@
               <label for="workEmail">Work e-mail</label>
               <input id="workEmail" name="workEmail" type="email" placeholder="jane.doe@acme.com" autocomplete="email">
             </div>
-            <div class="field">
+            <div class="field" data-advanced-only>
               <label for="privateEmail">Home e-mail</label>
               <input id="privateEmail" name="privateEmail" type="email" placeholder="jane.doe@gmail.com">
             </div>
-            <div class="field">
+            <div class="field" data-advanced-only>
               <label for="otherEmail">Other e-mail / Other</label>
               <input id="otherEmail" name="otherEmail" type="email" placeholder="contact@janedoe.org">
             </div>
@@ -221,13 +238,13 @@
         </section>
 
         <!-- Group 5: Addresses -->
-        <section class="group-card span-12" aria-labelledby="grp-addresses">
+        <section class="group-card span-12" id="group-card-addresses" aria-labelledby="grp-addresses">
           <div class="group-header">
             <h2 id="grp-addresses" class="group-title">
               <span class="group-badge">5</span>
               Addresses
             </h2>
-            <div class="addr-actions">
+            <div class="addr-actions" data-advanced-only>
               <button type="button" id="btn-copy-address" class="mini-link-btn" title="Copy Work address fields into Home address">
                 Copy work to home
               </button>
@@ -260,7 +277,7 @@
               </div>
             </fieldset>
 
-            <fieldset class="sub-group">
+            <fieldset class="sub-group" data-advanced-only>
               <legend>Home address</legend>
               <div class="fields-row cols-addr">
                 <div class="field addr-street">
@@ -286,7 +303,7 @@
               </div>
             </fieldset>
 
-            <fieldset class="sub-group">
+            <fieldset class="sub-group" data-advanced-only>
               <legend>Other address / Other</legend>
               <div class="fields-row cols-addr">
                 <div class="field addr-street">
@@ -315,7 +332,7 @@
         </section>
 
         <!-- Group 6: Dates -->
-        <section class="group-card span-6" aria-labelledby="grp-dates">
+        <section class="group-card span-6" id="group-card-dates" data-advanced-only aria-labelledby="grp-dates">
           <div class="group-header">
             <h2 id="grp-dates" class="group-title">
               <span class="group-badge">6</span>
@@ -341,7 +358,7 @@
         </section>
 
         <!-- Group 7: Websites -->
-        <section class="group-card span-6" aria-labelledby="grp-websites">
+        <section class="group-card span-6" id="group-card-websites" aria-labelledby="grp-websites">
           <div class="group-header">
             <h2 id="grp-websites" class="group-title">
               <span class="group-badge">7</span>
@@ -353,7 +370,7 @@
               <label for="workWebsite">Work website</label>
               <input id="workWebsite" name="workWebsite" type="url" placeholder="https://acme.com">
             </div>
-            <div class="field">
+            <div class="field" data-advanced-only>
               <label for="privateWebsite">Home website</label>
               <input id="privateWebsite" name="privateWebsite" type="url" placeholder="https://janedoe.dev">
             </div>
@@ -361,7 +378,7 @@
         </section>
 
         <!-- Group 8: Notes -->
-        <section class="group-card span-12" aria-labelledby="grp-notes">
+        <section class="group-card span-12" id="group-card-notes" data-advanced-only aria-labelledby="grp-notes">
           <div class="group-header">
             <h2 id="grp-notes" class="group-title">
               <span class="group-badge">8</span>
@@ -447,13 +464,19 @@
               <h2 id="phone-preview-title">Phone contact preview</h2>
               <p>How it looks after saving</p>
             </div>
-            <div class="segmented" role="group" aria-label="Preview phone OS">
-              <button type="button" class="os-btn active" data-os="iphone">iPhone</button>
-              <button type="button" class="os-btn" data-os="android">Android</button>
+            <div class="preview-head-controls">
+              <div class="segmented" role="group" aria-label="Preview phone OS">
+                <button type="button" class="os-btn active" data-os="iphone">iPhone</button>
+                <button type="button" class="os-btn" data-os="android">Android</button>
+              </div>
+              <div class="segmented" role="group" aria-label="Preview color theme">
+                <button type="button" class="preview-theme-btn active" data-prev-theme="light" title="Preview in Light Mode">Light</button>
+                <button type="button" class="preview-theme-btn" data-prev-theme="dark" title="Preview in Dark Mode">Dark</button>
+              </div>
             </div>
           </div>
 
-          <div class="phone-frame" id="phone-frame" data-os="iphone">
+          <div class="phone-frame" id="phone-frame" data-os="iphone" data-preview-theme="light">
             <div class="phone-statusbar">
               <span class="sb-time" id="sb-time">9:41</span>
               <span class="sb-notch" aria-hidden="true"></span>

@@ -104,8 +104,6 @@
   const btnCloseModal = document.getElementById('btn-close-modal');
   const btnModalClose = document.getElementById('btn-modal-close');
   const btnModalCopy = document.getElementById('btn-modal-copy');
-  const btnThemeToggle = document.getElementById('btn-theme-toggle');
-  const themeBtnLabel = document.getElementById('theme-btn-label');
 
   const segButtons = Array.from(document.querySelectorAll('.seg-btn'));
   const osButtons = Array.from(document.querySelectorAll('.os-btn'));
@@ -1559,38 +1557,93 @@
   });
   btnModalCopy.addEventListener('click', () => copyText(currentVCard, btnModalCopy, 'Copy text'));
 
-  // Theme Management (Light / Dark mode toggle with persistence)
-  function applyTheme(theme) {
+  // ═══════════════════════════════════════════════════════
+  // UI THEME (App dark/light mode)
+  // ═══════════════════════════════════════════════════════
+  const PREVIEW_THEME_KEY = 'contact_qr_preview_theme_v1';
+  const VIEW_MODE_KEY = 'contact_qr_view_mode_v1';
+
+  const btnThemeUi = document.getElementById('btn-theme-ui');
+  const btnThemePreview = document.getElementById('btn-theme-preview');
+  const btnThemeBoth = document.getElementById('btn-theme-both');
+  const uiThemeLabel = document.getElementById('ui-theme-label');
+  const previewThemeLabel = document.getElementById('preview-theme-label');
+  const previewThemeBtns = Array.from(document.querySelectorAll('.preview-theme-btn'));
+
+  function applyUiTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
-    if (themeBtnLabel) {
-      themeBtnLabel.textContent = theme === 'dark' ? 'Light mode' : 'Dark mode';
-    }
-    if (btnThemeToggle) {
-      btnThemeToggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
-    }
+    if (uiThemeLabel) uiThemeLabel.textContent = theme === 'dark' ? 'Light' : 'Dark';
+    try { localStorage.setItem(THEME_STORAGE_KEY, theme); } catch (_) {}
+  }
+
+  function applyPreviewTheme(theme) {
+    if (phoneFrame) phoneFrame.setAttribute('data-preview-theme', theme);
+    if (previewThemeLabel) previewThemeLabel.textContent = theme === 'dark' ? 'Light' : 'Dark';
+    // sync the Light/Dark segmented buttons in the preview head
+    previewThemeBtns.forEach(b => b.classList.toggle('active', b.dataset.prevTheme === theme));
+    try { localStorage.setItem(PREVIEW_THEME_KEY, theme); } catch (_) {}
+  }
+
+  function getUiTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  }
+
+  function getPreviewTheme() {
+    return (phoneFrame && phoneFrame.getAttribute('data-preview-theme') === 'dark') ? 'dark' : 'light';
   }
 
   function initTheme() {
-    let savedTheme = '';
-    try {
-      savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || '';
-    } catch (_) {}
+    // UI theme
+    let savedUi = '';
+    try { savedUi = localStorage.getItem(THEME_STORAGE_KEY) || ''; } catch (_) {}
+    if (!savedUi) savedUi = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    applyUiTheme(savedUi);
 
-    if (!savedTheme) {
-      savedTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    // Preview theme (default: light)
+    let savedPreview = '';
+    try { savedPreview = localStorage.getItem(PREVIEW_THEME_KEY) || ''; } catch (_) {}
+    if (!savedPreview) savedPreview = 'light';
+    applyPreviewTheme(savedPreview);
+
+    // Wire buttons
+    if (btnThemeUi) {
+      btnThemeUi.addEventListener('click', () => applyUiTheme(getUiTheme() === 'dark' ? 'light' : 'dark'));
     }
-    applyTheme(savedTheme);
-
-    if (btnThemeToggle) {
-      btnThemeToggle.addEventListener('click', () => {
-        const currentTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-        const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        applyTheme(nextTheme);
-        try {
-          localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
-        } catch (_) {}
+    if (btnThemePreview) {
+      btnThemePreview.addEventListener('click', () => applyPreviewTheme(getPreviewTheme() === 'dark' ? 'light' : 'dark'));
+    }
+    if (btnThemeBoth) {
+      btnThemeBoth.addEventListener('click', () => {
+        const next = getUiTheme() === 'dark' ? 'light' : 'dark';
+        applyUiTheme(next);
+        applyPreviewTheme(next);
       });
     }
+
+    // Preview segmented Light / Dark buttons inside the preview card
+    previewThemeBtns.forEach(btn => {
+      btn.addEventListener('click', () => applyPreviewTheme(btn.dataset.prevTheme));
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // VIEW MODE (Simple / Advanced)
+  // ═══════════════════════════════════════════════════════
+  const modeBtns = Array.from(document.querySelectorAll('.mode-btn'));
+
+  function applyViewMode(mode) {
+    document.body.setAttribute('data-view-mode', mode);
+    modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+    try { localStorage.setItem(VIEW_MODE_KEY, mode); } catch (_) {}
+  }
+
+  function initViewMode() {
+    let saved = '';
+    try { saved = localStorage.getItem(VIEW_MODE_KEY) || ''; } catch (_) {}
+    applyViewMode(saved === 'advanced' ? 'advanced' : 'simple');
+    modeBtns.forEach(btn => {
+      btn.addEventListener('click', () => applyViewMode(btn.dataset.mode));
+    });
   }
 
   // PWA Service Worker & Install Prompt Handling
@@ -1636,6 +1689,7 @@
   // Initialize
   initPWA();
   initTheme();
+  initViewMode();
   renderSavedSelect('');
   loadFromLocalStorage();
   update();

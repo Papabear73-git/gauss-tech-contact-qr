@@ -95,13 +95,65 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
   padding: 8px 14px;
   background: var(--topbar-bg);
   backdrop-filter: blur(10px);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
+}
+
+/* View-mode (Simple / Advanced) toggle */
+.view-mode-group {
+  display: inline-flex;
+  align-items: center;
+  background: var(--seg-bg);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 2px;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+.mode-btn {
+  height: 27px;
+  padding: 0 11px;
+  border-radius: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.mode-btn.active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 1px 4px rgba(37,99,235,0.18);
+}
+
+/* Theme controls group */
+.theme-controls-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.theme-controls-group .btn-theme {
+  padding: 0 9px;
+  font-size: 11.5px;
+  height: 29px;
+  white-space: nowrap;
+}
+
+/* Simple/Advanced: advanced-only fields hidden in simple mode */
+body:not([data-view-mode="advanced"]) [data-advanced-only] {
+  display: none !important;
 }
 
 .brand {
@@ -826,6 +878,33 @@ body {
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
+  flex-wrap: wrap;
+}
+
+.preview-head-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.preview-theme-btn {
+  border: none;
+  background: transparent;
+  padding: 3px 9px;
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.preview-theme-btn.active {
+  background: var(--seg-active-bg);
+  color: var(--accent);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
 }
 
 .phone-preview-head h2 {
@@ -1307,6 +1386,201 @@ body {
   .addr-postcode,
   .addr-country {
     grid-column: span 1;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   PREVIEW THEME: DARK MODE FOR IPHONE & ANDROID
+   ═══════════════════════════════════════════ */
+
+/* iPhone — dark */
+.phone-frame[data-preview-theme="dark"] .phone-statusbar {
+  background: #1c1c1e;
+  color: #ffffff;
+}
+
+.phone-frame[data-preview-theme="dark"] .sb-notch {
+  background: #000000;
+}
+
+.phone-frame[data-preview-theme="dark"] .phone-screen {
+  background: #000000;
+  color: #ffffff;
+}
+
+.phone-frame[data-preview-theme="dark"] .phone-home-bar {
+  background: #1c1c1e;
+}
+
+.phone-frame[data-preview-theme="dark"] .phone-home-bar span {
+  background: rgba(255,255,255,0.3);
+}
+
+/* iPhone dark — contact UI overrides */
+.phone-frame[data-preview-theme="dark"] .ios-name {
+  color: #ffffff;
+}
+
+.phone-frame[data-preview-theme="dark"] .ios-sub,
+.phone-frame[data-preview-theme="dark"] .ios-nickname {
+  color: #aeaeb2;
+}
+
+.phone-frame[data-preview-theme="dark"] .ios-act-btn {
+  background: #1c1c1e;
+  color: #0a84ff;
+}
+
+.phone-frame[data-preview-theme="dark"] .ios-act-btn.is-muted {
+  color: #636366;
+}
+
+.phone-frame[data-preview-theme="dark"] .ios-group {
+  background: #1c1c1e;
+}
+
+.phone-frame[data-preview-theme="dark"] .ios-row {
+  border-bottom-color: #3a3a3c;
+}
+
+.phone-frame[data-preview-theme="dark"] .ios-row-label {
+  color: #aeaeb2;
+}
+
+.phone-frame[data-preview-theme="dark"] .ios-row-val {
+  color: #0a84ff;
+}
+
+.phone-frame[data-preview-theme="dark"] .ios-row-val.is-plain {
+  color: #ffffff;
+}
+
+.phone-frame[data-preview-theme="dark"] .phone-empty-note {
+  background: #1c1c1e;
+  border-color: #3a3a3c;
+  color: #8e8e93;
+}
+
+.phone-frame[data-preview-theme="dark"] .phone-omitted-note {
+  background: #2c2200;
+  border-color: #6b4e00;
+  color: #ffd060;
+}
+
+/* Android — dark */
+.phone-frame[data-os="android"][data-preview-theme="dark"] .phone-statusbar {
+  background: #121316;
+  color: #e3e3e3;
+}
+
+.phone-frame[data-os="android"][data-preview-theme="dark"] .sb-notch {
+  background: #e3e3e3;
+}
+
+.phone-frame[data-os="android"][data-preview-theme="dark"] .phone-screen {
+  background: #121316;
+  color: #e3e3e3;
+}
+
+.phone-frame[data-os="android"][data-preview-theme="dark"] .phone-home-bar {
+  background: #121316;
+}
+
+.phone-frame[data-os="android"][data-preview-theme="dark"] .phone-home-bar span {
+  background: rgba(255,255,255,0.22);
+}
+
+/* Android dark — contact UI overrides */
+.phone-frame[data-os="android"][data-preview-theme="dark"] .and-edit-title {
+  color: #e3e3e3;
+}
+
+.phone-frame[data-os="android"][data-preview-theme="dark"] .and-edit-header {
+  color: #9aa0a6;
+}
+
+.phone-frame[data-os="android"][data-preview-theme="dark"] .and-save-btn {
+  background: #004a77;
+  color: #9ecaff;
+}
+
+.phone-frame[data-os="android"][data-preview-theme="dark"] .and-edit-card {
+  background: #1e1f22;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.phone-frame[data-os="android"][data-preview-theme="dark"] .and-input-line {
+  border-bottom-color: #3c4043;
+}
+
+.phone-frame[data-os="android"][data-preview-theme="dark"] .and-input-label-tag {
+  color: #9ecaff;
+}
+
+.phone-frame[data-os="android"][data-preview-theme="dark"] .and-input-val {
+  color: #e3e3e3;
+}
+
+.phone-frame[data-os="android"][data-preview-theme="dark"] .and-add-more-row {
+  color: #57bb8a;
+}
+
+.phone-frame[data-os="android"][data-preview-theme="dark"] .and-collapsed-section {
+  background: #1e1f22;
+  color: #bdc1c6;
+}
+
+.phone-frame[data-os="android"][data-preview-theme="dark"] .and-collapsed-section svg {
+  color: #bdc1c6;
+}
+
+.phone-frame[data-os="android"][data-preview-theme="dark"] .phone-empty-note {
+  background: #1e1f22;
+  border-color: #3c4043;
+  color: #9aa0a6;
+}
+
+.phone-frame[data-os="android"][data-preview-theme="dark"] .phone-omitted-note {
+  background: #2c2200;
+  border-color: #6b4e00;
+  color: #ffd060;
+}
+
+/* ═══════════════════════════════════════════
+   MOBILE: QR CODE STICKY ON TOP, FORM SCROLLS
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 980px) {
+  .workspace {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* QR panel moves to top; becomes sticky on scroll */
+  .qr-panel {
+    order: -1;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg);
+    padding: 6px 0 2px;
+  }
+
+  /* Only the qr-card itself is "sticky-visible"; phone preview scrolls normally */
+  .qr-card {
+    position: sticky;
+    top: 6px;
+  }
+
+  /* Phone preview card scrolls inline — not sticky */
+  .phone-preview-card {
+    position: static;
+  }
+
+  /* Form comes after QR */
+  .form-grid {
+    order: 1;
   }
 }
 
