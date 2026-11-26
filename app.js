@@ -9,8 +9,8 @@
   const STORAGE_KEY = 'contact_qr_webapp_v1';
   const SAVED_LIST_KEY = 'contact_qr_saved_list_v1';
   const THEME_STORAGE_KEY = 'contact_qr_theme_v1';
-  const APP_VERSION = '1.3.0';
-  const APP_PUBLISHED = '25 Nov 2026, 20:47';
+  const APP_VERSION = '1.4.0';
+  const APP_PUBLISHED = '26 Nov 2026, 09:25';
 
   const FIELD_IDS = [
     'prefix', 'firstName', 'middleName', 'lastName', 'nameSuffix', 'nickname',
@@ -77,6 +77,7 @@
   let currentQr = null;
   let currentVCard = '';
   let currentDisplayName = 'New Contact';
+  let lastFormData = {};
 
   // DOM references
   const form = document.getElementById('contact-form');
@@ -118,6 +119,17 @@
   const btnDeleteContact = document.getElementById('btn-delete-contact');
   const btnLoadVcf = document.getElementById('btn-load-vcf');
   const vcfFileInput = document.getElementById('vcf-file-input');
+
+  const qrStage = document.getElementById('qr-stage');
+  const qrTapHint = document.getElementById('qr-tap-hint');
+  const qrFsModal = document.getElementById('qr-fullscreen-modal');
+  const qrFsCode = document.getElementById('qr-fs-code');
+  const qrFsName = document.getElementById('qr-fs-name');
+  const qrFsCompany = document.getElementById('qr-fs-company');
+  const qrFsRows = document.getElementById('qr-fs-rows');
+  const btnCloseQrFs = document.getElementById('btn-close-qr-fs');
+  const btnSaveToPhone = document.getElementById('btn-save-to-phone');
+  const mobileSaveHint = document.getElementById('mobile-save-phone-hint');
 
   function getValues() {
     const data = {};
@@ -367,6 +379,9 @@
     btnDownloadSvg.disabled = !enabled;
     btnDownloadVcf.disabled = !enabled;
     btnCopyVcard.disabled = !enabled;
+    if (btnSaveToPhone) btnSaveToPhone.disabled = !enabled;
+    if (qrTapHint) qrTapHint.hidden = !enabled;
+    if (qrStage) qrStage.classList.toggle('is-clickable', enabled);
   }
 
   function escapeHtml(str) {
@@ -554,292 +569,229 @@
     return html;
   }
 
+  function formatAndroidDate(isoStr) {
+    if (!isoStr) return '';
+    const m = isoStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return isoStr;
+    const dt = new Date(Date.UTC(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10)));
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${days[dt.getUTCDay()]}, ${dt.getUTCDate()} ${months[dt.getUTCMonth()]} ${m[1]}`;
+  }
+
   function renderAndroidPreview(d, displayName, populatedCount) {
-    const iconUser = '<svg class="and-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
-    const iconPhone = '<svg class="and-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 11.2 18.8 19.5 19.5 0 0 1 5.2 12.8 19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6.2 6.2l1.3-1.3a2 2 0 0 1 2.1-.5c.9.4 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>';
-    const iconWork = '<svg class="and-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>';
-    const iconMail = '<svg class="and-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,6 12,13 2,6"/></svg>';
-    const iconPin = '<svg class="and-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
-    const iconCal = '<svg class="and-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
-    const iconLink = '<svg class="and-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>';
-    const iconNote = '<svg class="and-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
-    const iconGroup = '<svg class="and-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
-    const iconRelation = '<svg class="and-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
-    const iconPlus = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
-    const iconChevronDown = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
-    const iconChevronUp = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>';
+    const iconBack = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>';
+    const iconCall = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15.5 15.5 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.24c1.1.36 2.3.56 3.6.56a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.6 21 3 13.4 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.3.2 2.5.56 3.6a1 1 0 0 1-.25 1l-2.21 2.2z"/></svg>';
+    const iconChat = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg>';
+    const iconVideo = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4z"/></svg>';
+    const iconMail = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,6 12,13 2,6"/></svg>';
+    const iconPin = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+    const iconCal = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+    const iconGlobe = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>';
 
     let html = `
-      <div class="and-edit-header">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        <span class="and-edit-title">Create contact</span>
-        <span class="and-save-btn">Save</span>
+      <div class="and-view-navbar">
+        <span class="and-view-back" aria-hidden="true">${iconBack}</span>
       </div>
     `;
 
     if (populatedCount === 0) {
-      html += `<div class="phone-empty-note">Start typing on the left to see how Android Google Contacts lays out every field when importing this contact.</div>`;
+      html += `<div class="phone-empty-note">Start typing to see how Android Contacts displays this saved contact card.</div>`;
       return html;
     }
 
-    // Card 1: Name fields (Structured expanded)
-    const nameLines = [];
-    if (d.prefix) nameLines.push(d.prefix);
-    if (d.firstName) nameLines.push(d.firstName);
-    if (d.middleName) nameLines.push(d.middleName);
-    if (d.lastName) nameLines.push(d.lastName);
-    if (d.nameSuffix) nameLines.push(d.nameSuffix);
-    if (d.phoneticFirstName) nameLines.push(`Phonetic: ${d.phoneticFirstName}`);
-    if (d.phoneticLastName) nameLines.push(`Phonetic: ${d.phoneticLastName}`);
+    const initials = escapeHtml(getInitials(d, displayName));
+    const allPhones = [];
+    if (d.mobilePhone) allPhones.push(['Mobile', d.mobilePhone]);
+    if (d.workPhone) allPhones.push(['Work', d.workPhone]);
+    if (d.homePhone) allPhones.push(['Home', d.homePhone]);
+    if (d.mainPhone) allPhones.push(['MAIN', d.mainPhone]);
+    if (d.workFax) allPhones.push(['Work fax', d.workFax]);
+    if (d.homeFax) allPhones.push(['Home fax', d.homeFax]);
+    if (d.pagerPhone) allPhones.push(['Pager', d.pagerPhone]);
+    if (d.otherPhone) allPhones.push(['Other', d.otherPhone]);
 
-    if (nameLines.length) {
-      html += `
-        <div class="and-edit-card">
-          <div class="and-card-row">
-            ${iconUser}
-            <div class="and-card-fields">
-              ${nameLines.map((v) => `
-                <div class="and-input-line">
-                  <div class="and-input-val">${escapeHtml(v)}</div>
-                </div>
-              `).join('')}
-            </div>
-            <div class="and-card-top-action">${iconChevronUp}</div>
-          </div>
-        </div>
-      `;
-    }
+    const primaryPhone = allPhones[0] || null;
+    const secondaryPhones = allPhones.slice(1);
+    const hasPhone = allPhones.length > 0;
+    const hasEmail = !!(d.workEmail || d.privateEmail || d.otherEmail);
 
-    // Card 2: Nickname
-    if (d.nickname) {
-      html += `
-        <div class="and-edit-card">
-          <div class="and-card-row">
-            ${iconUser}
-            <div class="and-card-fields">
-              <div class="and-input-line">
-                <div class="and-input-val">${escapeHtml(d.nickname)}</div>
-                <div class="and-del-badge"></div>
+    // Android Contact View Hero
+    html += `
+      <div class="and-view-hero">
+        <div class="and-view-hero-top">
+          <div class="and-view-hero-info">
+            <div class="and-view-name">${escapeHtml(displayName)}</div>
+            ${primaryPhone ? `
+              <div class="and-view-primary-tel">
+                <strong>${escapeHtml(primaryPhone[0])}</strong>
+                <span>${escapeHtml(primaryPhone[1])}</span>
+                <span class="and-view-chev">&#x203A;</span>
               </div>
-            </div>
+            ` : ''}
+          </div>
+          <div class="and-view-avatar">${initials}</div>
+        </div>
+        <div class="and-view-actions">
+          <div class="and-view-act-btn is-call ${hasPhone ? '' : 'is-muted'}" aria-hidden="true">${iconCall}</div>
+          <div class="and-view-act-btn is-chat ${hasPhone ? '' : 'is-muted'}" aria-hidden="true">${iconChat}</div>
+          <div class="and-view-act-btn is-video ${hasPhone || hasEmail ? '' : 'is-muted'}" aria-hidden="true">${iconVideo}</div>
+          <div class="and-view-act-btn is-mail ${hasEmail ? '' : 'is-muted'}" aria-hidden="true">${iconMail}</div>
+        </div>
+      </div>
+    `;
+
+    const rows = [];
+
+    if (d.nickname) {
+      rows.push(`
+        <div class="and-view-row">
+          <div class="and-view-row-main">
+            <div class="and-view-row-lbl">Nickname</div>
+            <div class="and-view-row-val">${escapeHtml(d.nickname)}</div>
           </div>
         </div>
-      `;
+      `);
     }
 
-    // Card 3: Phones
-    const phones = [];
-    if (d.mobilePhone) phones.push(['Mobile', d.mobilePhone]);
-    if (d.workPhone) phones.push(['Work', d.workPhone]);
-    if (d.homePhone) phones.push(['Home', d.homePhone]);
-    if (d.mainPhone) phones.push(['Main', d.mainPhone]);
-    if (d.workFax) phones.push(['Work fax', d.workFax]);
-    if (d.homeFax) phones.push(['Home fax', d.homeFax]);
-    if (d.pagerPhone) phones.push(['Pager', d.pagerPhone]);
-    if (d.otherPhone) phones.push(['Other', d.otherPhone]);
-
-    if (phones.length) {
-      html += `
-        <div class="and-edit-card">
-          <div class="and-card-row">
-            ${iconPhone}
-            <div class="and-card-fields">
-              ${phones.map(([lbl, val]) => `
-                <div class="and-input-line">
-                  <div style="flex:1">
-                    <div class="and-input-label-tag">${escapeHtml(lbl)} ${iconChevronDown}</div>
-                    <div class="and-input-val">${escapeHtml(val)}</div>
-                  </div>
-                  <div class="and-del-badge"></div>
-                </div>
-              `).join('')}
-              <div class="and-add-more-row">${iconPlus} Add phone number</div>
-            </div>
+    for (const [lbl, val] of secondaryPhones) {
+      rows.push(`
+        <div class="and-view-row">
+          <div class="and-view-row-main">
+            <div class="and-view-row-lbl">${escapeHtml(lbl)}</div>
+            <div class="and-view-row-val">${escapeHtml(val)}</div>
+          </div>
+          <div class="and-view-row-icons" aria-hidden="true">
+            <span class="and-mini-ico is-call">${iconCall}</span>
+            <span class="and-mini-ico is-chat">${iconChat}</span>
+            <span class="and-mini-ico is-video">${iconVideo}</span>
           </div>
         </div>
-      `;
+      `);
     }
 
-    // Card 4: Work details (Title, Role, Department, Company)
-    const workItems = [d.title, d.role, d.department, d.company].filter(Boolean);
-    if (workItems.length) {
-      html += `
-        <div class="and-edit-card">
-          <div class="and-card-row">
-            ${iconWork}
-            <div class="and-card-fields">
-              ${workItems.map((val, idx) => `
-                <div class="and-input-line">
-                  <div class="and-input-val">${escapeHtml(val)}</div>
-                  ${idx === 0 ? '<div class="and-del-badge"></div>' : ''}
-                </div>
-              `).join('')}
-            </div>
+    const workInfo = [d.title, d.role, d.department, d.company].filter(Boolean).join(', ');
+    if (workInfo) {
+      rows.push(`
+        <div class="and-view-row">
+          <div class="and-view-row-main">
+            <div class="and-view-row-lbl">Work info</div>
+            <div class="and-view-row-val">${escapeHtml(workInfo)}</div>
           </div>
         </div>
-      `;
+      `);
     }
 
-    // Card 5: Emails
+    const phonetics = [d.phoneticFirstName, d.phoneticLastName].filter(Boolean).join(' ');
+    if (phonetics) {
+      rows.push(`
+        <div class="and-view-row">
+          <div class="and-view-row-main">
+            <div class="and-view-row-lbl">Phonetic name</div>
+            <div class="and-view-row-val">${escapeHtml(phonetics)}</div>
+          </div>
+        </div>
+      `);
+    }
+
     const emails = [];
     if (d.workEmail) emails.push(['Work', d.workEmail]);
     if (d.privateEmail) emails.push(['Home', d.privateEmail]);
-    if (d.otherEmail) emails.push(['Other', d.otherEmail]);
-
-    if (emails.length) {
-      html += `
-        <div class="and-edit-card">
-          <div class="and-card-row">
-            ${iconMail}
-            <div class="and-card-fields">
-              ${emails.map(([lbl, val]) => `
-                <div class="and-input-line">
-                  <div style="flex:1">
-                    <div class="and-input-label-tag">${escapeHtml(lbl)} ${iconChevronDown}</div>
-                    <div class="and-input-val">${escapeHtml(val)}</div>
-                  </div>
-                  <div class="and-del-badge"></div>
-                </div>
-              `).join('')}
-              <div class="and-add-more-row">${iconPlus} Add email</div>
-            </div>
+    if (d.otherEmail) emails.push(['OTHER', d.otherEmail]);
+    for (const [lbl, val] of emails) {
+      rows.push(`
+        <div class="and-view-row">
+          <div class="and-view-row-main">
+            <div class="and-view-row-lbl">${escapeHtml(lbl)}</div>
+            <div class="and-view-row-val">${escapeHtml(val)}</div>
+          </div>
+          <div class="and-view-row-icons" aria-hidden="true">
+            <span class="and-mini-ico is-outline">${iconMail}</span>
           </div>
         </div>
-      `;
+      `);
     }
 
-    // Card 6: Addresses (Work, Home, Other)
     const addresses = [];
-    if (d.workStreet || d.workCity || d.workState || d.workPostcode || d.workCountry) {
-      addresses.push(['Work', [d.workStreet, d.workCity, d.workState, d.workPostcode, d.workCountry]]);
-    }
-    if (d.privateStreet || d.privateCity || d.privateState || d.privatePostcode || d.privateCountry) {
-      addresses.push(['Home', [d.privateStreet, d.privateCity, d.privateState, d.privatePostcode, d.privateCountry]]);
-    }
-    if (d.otherStreet || d.otherCity || d.otherState || d.otherPostcode || d.otherCountry) {
-      addresses.push(['Other', [d.otherStreet, d.otherCity, d.otherState, d.otherPostcode, d.otherCountry]]);
-    }
-
-    if (addresses.length) {
-      html += `
-        <div class="and-edit-card">
-          <div class="and-card-row">
-            ${iconPin}
-            <div class="and-card-fields">
-              ${addresses.map(([lbl, lines]) => `
-                <div class="and-input-line" style="flex-direction:column;align-items:flex-start">
-                  <div style="display:flex;align-items:center;width:100%">
-                    <div class="and-input-label-tag">${escapeHtml(lbl)} ${iconChevronDown}</div>
-                    <div class="and-del-badge"></div>
-                  </div>
-                  ${lines.filter(Boolean).map((ln) => `
-                    <div class="and-input-line" style="width:100%;padding:3px 0">
-                      <div class="and-input-val">${escapeHtml(ln)}</div>
-                    </div>
-                  `).join('')}
-                </div>
-              `).join('')}
-              <div class="and-add-more-row">${iconPlus} Add address</div>
-            </div>
+    const workAddr = formatAddressLines(d.workStreet, d.workCity, d.workState, d.workPostcode, d.workCountry);
+    const privAddr = formatAddressLines(d.privateStreet, d.privateCity, d.privateState, d.privatePostcode, d.privateCountry);
+    const otherAddr = formatAddressLines(d.otherStreet, d.otherCity, d.otherState, d.otherPostcode, d.otherCountry);
+    if (workAddr.length) addresses.push(['Work', workAddr]);
+    if (privAddr.length) addresses.push(['Home', privAddr]);
+    if (otherAddr.length) addresses.push(['OTHER', otherAddr]);
+    for (const [lbl, lines] of addresses) {
+      rows.push(`
+        <div class="and-view-row">
+          <div class="and-view-row-main">
+            <div class="and-view-row-lbl">${escapeHtml(lbl)}</div>
+            <div class="and-view-row-val">${lines.map(escapeHtml).join('<br>')}</div>
+          </div>
+          <div class="and-view-row-icons" aria-hidden="true">
+            <span class="and-mini-ico is-outline">${iconPin}</span>
           </div>
         </div>
-      `;
+      `);
     }
 
-    // Card 7: Important dates (Birthday & Name day)
     const parsedNameDay = parseNameDay(d.nameDay);
-    const dateEntries = [];
     if (d.birthdate) {
-      dateEntries.push(['Birthday', formatHumanDate(d.birthdate)]);
+      rows.push(`
+        <div class="and-view-row">
+          <div class="and-view-row-main">
+            <div class="and-view-row-lbl">Birthday</div>
+            <div class="and-view-row-val">${escapeHtml(formatAndroidDate(d.birthdate))}</div>
+          </div>
+          <div class="and-view-row-icons" aria-hidden="true">
+            <span class="and-mini-ico is-outline">${iconCal}</span>
+          </div>
+        </div>
+      `);
     }
     if (parsedNameDay && parsedNameDay.kind !== 'text' && compatTarget !== 'iphone') {
-      dateEntries.push(['Name day', formatNameDayDisplay(parsedNameDay)]);
-    }
-
-    if (dateEntries.length) {
-      html += `
-        <div class="and-edit-card">
-          <div class="and-card-row">
-            ${iconCal}
-            <div class="and-card-fields">
-              ${dateEntries.map(([lbl, val]) => `
-                <div class="and-input-line">
-                  <div style="flex:1">
-                    <div class="and-input-label-tag">${escapeHtml(lbl)} ${iconChevronDown}</div>
-                    <div class="and-input-val" style="margin-top:2px;display:inline-block;padding:2px 10px;background:#2a2b2f;border-radius:12px">${escapeHtml(val)}</div>
-                  </div>
-                  <div class="and-del-badge"></div>
-                </div>
-              `).join('')}
-              <div class="and-add-more-row">${iconPlus} Add important date</div>
-            </div>
+      rows.push(`
+        <div class="and-view-row">
+          <div class="and-view-row-main">
+            <div class="and-view-row-lbl">Name day</div>
+            <div class="and-view-row-val">${escapeHtml(formatNameDayDisplay(parsedNameDay))}</div>
+          </div>
+          <div class="and-view-row-icons" aria-hidden="true">
+            <span class="and-mini-ico is-outline">${iconCal}</span>
           </div>
         </div>
-      `;
+      `);
     }
 
-    // Collapsed Groups bar
-    html += `
-      <div class="and-collapsed-section">
-        ${iconGroup}
-        <span>Groups</span>
-      </div>
-    `;
-
-    // Card 8: Websites
     const websites = [];
     if (d.workWebsite) websites.push(escapeUrlValue(d.workWebsite));
     if (d.privateWebsite) websites.push(escapeUrlValue(d.privateWebsite));
-
-    if (websites.length) {
-      html += `
-        <div class="and-edit-card">
-          <div class="and-card-row">
-            ${iconLink}
-            <div class="and-card-fields">
-              ${websites.map((url) => `
-                <div class="and-input-line">
-                  <div class="and-input-val">${escapeHtml(url)}</div>
-                  <div class="and-del-badge"></div>
-                </div>
-              `).join('')}
-              <div class="and-add-more-row">${iconPlus} Add website</div>
-            </div>
+    for (const url of websites) {
+      rows.push(`
+        <div class="and-view-row">
+          <div class="and-view-row-main">
+            <div class="and-view-row-lbl">Website</div>
+            <div class="and-view-row-val">${escapeHtml(url)}</div>
+          </div>
+          <div class="and-view-row-icons" aria-hidden="true">
+            <span class="and-mini-ico is-outline">${iconGlobe}</span>
           </div>
         </div>
-      `;
+      `);
     }
 
-    // Collapsed Relationships bar
-    html += `
-      <div class="and-collapsed-section">
-        ${iconRelation}
-        <span>Relationships</span>
-      </div>
-    `;
-
-    // Card 9: Notes
     if (d.notes || (parsedNameDay && parsedNameDay.kind === 'text')) {
       const allNotes = [d.notes, (parsedNameDay && parsedNameDay.kind === 'text' ? `Name day: ${parsedNameDay.raw}` : '')].filter(Boolean).join('\n\n');
-      html += `
-        <div class="and-edit-card">
-          <div class="and-card-row">
-            ${iconNote}
-            <div class="and-card-fields">
-              <div class="and-input-line">
-                <div class="and-input-val">${escapeHtml(allNotes)}</div>
-              </div>
-            </div>
+      rows.push(`
+        <div class="and-view-row">
+          <div class="and-view-row-main">
+            <div class="and-view-row-lbl">Notes</div>
+            <div class="and-view-row-val">${escapeHtml(allNotes).replace(/\n/g, '<br>')}</div>
           </div>
         </div>
-      `;
-    } else {
-      html += `
-        <div class="and-collapsed-section">
-          ${iconNote}
-          <span>Notes</span>
-        </div>
-      `;
+      `);
+    }
+
+    if (rows.length) {
+      html += `<div class="and-view-card">${rows.join('')}</div>`;
     }
 
     if (parsedNameDay && parsedNameDay.kind !== 'text' && compatTarget === 'iphone') {
@@ -1252,6 +1204,7 @@
 
   function update() {
     const data = getValues();
+    lastFormData = data;
     const populatedCount = FIELD_IDS.reduce((acc, id) => acc + (data[id] ? 1 : 0), 0);
 
     saveToLocalStorage(data);
@@ -1264,6 +1217,7 @@
       currentQr = null;
       currentVCard = '';
       currentDisplayName = 'New Contact';
+      lastFormData = {};
 
       qrEmpty.hidden = false;
       qrOutput.hidden = true;
@@ -1409,6 +1363,97 @@
     triggerDownload(blob, `${sanitizedFileBase()}.vcf`);
   }
 
+  function saveContactToPhone() {
+    if (!currentVCard) return;
+    const ua = navigator.userAgent || '';
+    const isIos = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const filename = `${sanitizedFileBase()}.vcf`;
+
+    if (isIos) {
+      // On iOS Safari, opening a text/vcard data URI (without download attr) launches the native Contacts sheet
+      const dataUrl = `data:text/vcard;charset=utf-8,${encodeURIComponent(currentVCard)}`;
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      if (mobileSaveHint) {
+        mobileSaveHint.textContent = 'In the iPhone contact sheet, tap Save (or Create New Contact). If downloaded, open the .vcf file to import.';
+      }
+      return;
+    }
+
+    // On Android, downloading/opening a .vcf triggers the system Contacts importer ("Save to Device / Google / ...").
+    const blob = new Blob([currentVCard], { type: 'text/vcard;charset=utf-8' });
+    triggerDownload(blob, filename);
+    if (mobileSaveHint) {
+      mobileSaveHint.textContent = 'Tap Open on the downloaded .vcf file — Android will ask whether to save to your Phone or Google account.';
+    }
+  }
+
+  function openQrFullscreen() {
+    if (!currentQr || !qrFsModal) return;
+    const d = lastFormData || {};
+    if (qrFsCode) {
+      qrFsCode.innerHTML = currentQr.createSvgTag({
+        cellSize: 6,
+        margin: 16,
+        scalable: true,
+        title: `Contact QR code for ${currentDisplayName}`
+      });
+    }
+    if (qrFsName) {
+      qrFsName.textContent = currentDisplayName;
+    }
+    if (qrFsCompany) {
+      if (d.company) {
+        qrFsCompany.textContent = d.company;
+        qrFsCompany.hidden = false;
+      } else {
+        qrFsCompany.textContent = '';
+        qrFsCompany.hidden = true;
+      }
+    }
+    if (qrFsRows) {
+      const infoItems = [];
+      if (d.workPhone) {
+        infoItems.push(['Work phone', d.workPhone]);
+      } else if (d.mobilePhone) {
+        infoItems.push(['Mobile', d.mobilePhone]);
+      }
+      const emailVal = d.workEmail || d.privateEmail || d.otherEmail;
+      if (emailVal) {
+        infoItems.push([d.workEmail ? 'Work e-mail' : 'E-mail', emailVal]);
+      }
+      const siteVal = d.workWebsite || d.privateWebsite;
+      if (siteVal) {
+        infoItems.push([d.workWebsite ? 'Company website' : 'Website', escapeUrlValue(siteVal)]);
+      }
+      qrFsRows.innerHTML = infoItems.map(([lbl, val]) => `
+        <div class="qr-fs-row">
+          <span class="qr-fs-lbl">${escapeHtml(lbl)}</span>
+          <span class="qr-fs-val">${escapeHtml(val)}</span>
+        </div>
+      `).join('');
+    }
+
+    if (typeof qrFsModal.showModal === 'function') {
+      if (!qrFsModal.open) qrFsModal.showModal();
+    } else {
+      qrFsModal.setAttribute('open', '');
+    }
+  }
+
+  function closeQrFullscreen() {
+    if (!qrFsModal) return;
+    if (typeof qrFsModal.close === 'function') {
+      if (qrFsModal.open) qrFsModal.close();
+    } else {
+      qrFsModal.removeAttribute('open');
+    }
+  }
+
   async function copyText(text, buttonEl, defaultLabel) {
     if (!text) return;
     try {
@@ -1533,6 +1578,26 @@
   btnDownloadPng.addEventListener('click', downloadPng);
   btnDownloadSvg.addEventListener('click', downloadSvg);
   btnDownloadVcf.addEventListener('click', downloadVcf);
+  if (btnSaveToPhone) {
+    btnSaveToPhone.addEventListener('click', saveContactToPhone);
+  }
+  if (qrStage) {
+    qrStage.addEventListener('click', openQrFullscreen);
+    qrStage.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openQrFullscreen();
+      }
+    });
+  }
+  if (btnCloseQrFs) {
+    btnCloseQrFs.addEventListener('click', closeQrFullscreen);
+  }
+  if (qrFsModal) {
+    qrFsModal.addEventListener('click', (e) => {
+      if (e.target === qrFsModal) closeQrFullscreen();
+    });
+  }
   btnCopyVcard.addEventListener('click', () => copyText(currentVCard, btnCopyVcard, 'Copy vCard'));
 
   btnViewVcard.addEventListener('click', () => {
@@ -1574,13 +1639,21 @@
 
   function applyUiTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
-    if (uiThemeLabel) uiThemeLabel.textContent = theme === 'dark' ? 'Light' : 'Dark';
+    if (uiThemeLabel) uiThemeLabel.textContent = theme === 'dark' ? 'Dark' : 'Light';
+    if (btnThemeUi) {
+      btnThemeUi.title = theme === 'dark' ? 'UI is Dark — click for Light mode' : 'UI is Light — click for Dark mode';
+    }
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) metaTheme.setAttribute('content', theme === 'dark' ? '#0b0f19' : '#f1f5f9');
     try { localStorage.setItem(THEME_STORAGE_KEY, theme); } catch (_) {}
   }
 
   function applyPreviewTheme(theme) {
     if (phoneFrame) phoneFrame.setAttribute('data-preview-theme', theme);
-    if (previewThemeLabel) previewThemeLabel.textContent = theme === 'dark' ? 'Light' : 'Dark';
+    if (previewThemeLabel) previewThemeLabel.textContent = theme === 'dark' ? 'Dark' : 'Light';
+    if (btnThemePreview) {
+      btnThemePreview.title = theme === 'dark' ? 'Phone preview is Dark — click for Light mode' : 'Phone preview is Light — click for Dark mode';
+    }
     // sync the Light/Dark segmented buttons in the preview head
     previewThemeBtns.forEach(b => b.classList.toggle('active', b.dataset.prevTheme === theme));
     try { localStorage.setItem(PREVIEW_THEME_KEY, theme); } catch (_) {}
@@ -1616,7 +1689,7 @@
     }
     if (btnThemeBoth) {
       btnThemeBoth.addEventListener('click', () => {
-        const next = getUiTheme() === 'dark' ? 'light' : 'dark';
+        const next = (getUiTheme() === 'dark' && getPreviewTheme() === 'dark') ? 'light' : 'dark';
         applyUiTheme(next);
         applyPreviewTheme(next);
       });

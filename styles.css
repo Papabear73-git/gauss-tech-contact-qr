@@ -187,6 +187,14 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
   color: var(--text);
 }
 
+.title-short {
+  display: none;
+}
+
+.title-full {
+  display: inline;
+}
+
 .subtitle {
   margin: 1px 0 0;
   font-size: 11.5px;
@@ -217,7 +225,7 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
   padding: 0 8px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
-  background: #ffffff;
+  background: var(--input-bg);
   color: var(--text);
   font-family: inherit;
   font-size: 12px;
@@ -283,7 +291,7 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
   justify-content: space-between;
   margin-bottom: 7px;
   padding-bottom: 5px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border);
 }
 
 .group-title {
@@ -554,6 +562,7 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
 }
 
 .qr-stage {
+  position: relative;
   background: #ffffff;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -565,6 +574,38 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
   place-items: center;
   padding: 6px;
   overflow: hidden;
+  transition: transform 0.12s ease, box-shadow 0.15s ease;
+}
+
+.qr-stage.is-clickable {
+  cursor: pointer;
+}
+
+.qr-stage.is-clickable:hover {
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.18);
+}
+
+.qr-stage.is-clickable:active {
+  transform: scale(0.985);
+}
+
+.qr-tap-hint {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.qr-tap-hint svg {
+  width: 12px;
+  height: 12px;
 }
 
 .qr-empty {
@@ -1142,168 +1183,514 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
   color: #111827;
 }
 
-/* Android Contact Input/Edit Screen UI (Light Material Theme) */
-.and-edit-header {
+/* Android Contact View Screen UI (Light Material / OneUI Style) */
+.and-view-navbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 4px 2px 10px;
-  color: #444746;
+  justify-content: flex-start;
+  padding: 2px 2px 6px;
+  color: #1f1f1f;
 }
 
-.and-edit-header svg {
+.and-view-back svg {
+  width: 17px;
+  height: 17px;
+  display: block;
+}
+
+.and-view-hero {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 12px 12px 11px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.and-view-hero-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.and-view-hero-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.and-view-name {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.22;
+  color: #111827;
+  word-break: break-word;
+}
+
+.and-view-primary-tel {
+  margin-top: 5px;
+  font-size: 11px;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.and-view-primary-tel strong {
+  font-weight: 700;
+  color: #111827;
+}
+
+.and-view-chev {
+  display: inline-grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  color: #374151;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.and-view-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #7dd3fc;
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.and-view-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  justify-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.and-view-act-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  display: grid;
+  place-items: center;
+}
+
+.and-view-act-btn svg {
   width: 16px;
   height: 16px;
 }
 
-.and-edit-title {
-  font-size: 13.5px;
-  font-weight: 500;
-  color: #1f1f1f;
+.and-view-act-btn.is-call { color: #16a34a; }
+.and-view-act-btn.is-chat { color: #0284c7; }
+.and-view-act-btn.is-video { background: #eab308; color: #ffffff; }
+.and-view-act-btn.is-mail { color: #4b5563; }
+
+.and-view-act-btn.is-muted {
+  opacity: 0.35;
 }
 
-.and-save-btn {
-  background: #0b57d0;
-  color: #ffffff;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 3px 12px;
-  border-radius: 999px;
-}
-
-.and-edit-card {
+.and-view-card {
   background: #ffffff;
   border-radius: 18px;
-  padding: 10px 12px;
+  overflow: hidden;
   margin-bottom: 9px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
-.and-card-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.and-card-icon {
-  width: 17px;
-  height: 17px;
-  color: #444746;
-  flex-shrink: 0;
-  margin-top: 6px;
-}
-
-.and-card-fields {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.and-card-top-action {
-  color: #444746;
-  display: grid;
-  place-items: center;
-  margin-top: 4px;
-}
-
-.and-card-top-action svg {
-  width: 14px;
-  height: 14px;
-}
-
-.and-input-line {
-  position: relative;
+.and-view-row {
   display: flex;
   align-items: center;
-  border-bottom: 1px solid #e1e3e1;
-  padding: 4px 0 5px;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
+  border-bottom: 1px solid #eceef2;
 }
 
-.and-input-line:last-child {
+.and-view-row:last-child {
   border-bottom: none;
 }
 
-.and-input-label-tag {
+.and-view-row-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.and-view-row-lbl {
   font-size: 10px;
-  color: #0b57d0;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 2px;
+  color: #6b7280;
   margin-bottom: 1px;
 }
 
-.and-input-label-tag svg {
-  width: 10px;
-  height: 10px;
-}
-
-.and-input-val {
+.and-view-row-val {
   font-size: 11.5px;
-  color: #1f1f1f;
+  color: #111827;
   line-height: 1.35;
   word-break: break-word;
 }
 
-.and-del-badge {
-  width: 12px;
-  height: 2px;
-  background: #ba1a1a;
-  border-radius: 2px;
-  margin-left: auto;
-  flex-shrink: 0;
-}
-
-.and-add-more-row {
+.and-view-row-icons {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 0 2px;
-  color: #146c2e;
-  font-size: 11px;
-  font-weight: 500;
+  flex-shrink: 0;
 }
 
-.and-add-more-row svg {
+.and-mini-ico {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+
+.and-mini-ico svg {
   width: 13px;
   height: 13px;
 }
 
-.and-collapsed-section {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.and-mini-ico.is-call { color: #16a34a; }
+.and-mini-ico.is-chat { color: #0284c7; }
+.and-mini-ico.is-video { background: #eab308; color: #ffffff; }
+.and-mini-ico.is-outline { color: #6b7280; }
+
+.phone-empty-note {
   background: #ffffff;
-  border-radius: 18px;
-  padding: 10px 12px;
-  margin-bottom: 9px;
-  color: #444746;
-  font-size: 11.5px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 16px 12px;
+  text-align: center;
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.45;
 }
 
-.and-collapsed-section svg {
-  width: 16px;
-  height: 16px;
-  color: #444746;
+.phone-omitted-note {
+  margin-top: 6px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 10.5px;
+  color: #92400e;
+  line-height: 1.35;
+}
+
+/* ── Phone Preview Dark Mode (iPhone) ── */
+.phone-frame[data-preview-theme='dark'] .phone-statusbar {
+  background: #000000;
+  color: #ffffff;
+}
+
+.phone-frame[data-preview-theme='dark'] .sb-notch {
+  background: #1c1c1e;
+}
+
+.phone-frame[data-preview-theme='dark'] .phone-screen {
+  background: #000000;
+  color: #ffffff;
+}
+
+.phone-frame[data-preview-theme='dark'] .phone-home-bar {
+  background: #000000;
+}
+
+.phone-frame[data-preview-theme='dark'] .phone-home-bar span {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.phone-frame[data-preview-theme='dark'] .ios-navbar {
+  color: #0a84ff;
+}
+
+.phone-frame[data-preview-theme='dark'] .ios-name {
+  color: #ffffff;
+}
+
+.phone-frame[data-preview-theme='dark'] .ios-sub,
+.phone-frame[data-preview-theme='dark'] .ios-nickname {
+  color: #aeaeb2;
+}
+
+.phone-frame[data-preview-theme='dark'] .ios-act-btn {
+  background: #1c1c1e;
+  color: #0a84ff;
+}
+
+.phone-frame[data-preview-theme='dark'] .ios-act-btn.is-muted {
+  color: #636366;
+}
+
+.phone-frame[data-preview-theme='dark'] .ios-group {
+  background: #1c1c1e;
+}
+
+.phone-frame[data-preview-theme='dark'] .ios-row {
+  border-bottom-color: #3a3a3c;
+}
+
+.phone-frame[data-preview-theme='dark'] .ios-row-label {
+  color: #aeaeb2;
+}
+
+.phone-frame[data-preview-theme='dark'] .ios-row-val {
+  color: #0a84ff;
+}
+
+.phone-frame[data-preview-theme='dark'] .ios-row-val.is-plain {
+  color: #ffffff;
+}
+
+.phone-frame[data-preview-theme='dark'] .phone-empty-note {
+  background: #1c1c1e;
+  border-color: #3a3a3c;
+  color: #8e8e93;
+}
+
+.phone-frame[data-preview-theme='dark'] .phone-omitted-note {
+  background: #2c2200;
+  border-color: #6b4e00;
+  color: #ffd060;
+}
+
+/* ── Phone Preview Dark Mode (Android Contact View) ── */
+.phone-frame[data-os='android'][data-preview-theme='dark'] .phone-statusbar {
+  background: #000000;
+  color: #f1f3f4;
+}
+
+.phone-frame[data-os='android'][data-preview-theme='dark'] .sb-notch {
+  background: #2b2d30;
+}
+
+.phone-frame[data-os='android'][data-preview-theme='dark'] .phone-screen {
+  background: #000000;
+  color: #f1f3f4;
+}
+
+.phone-frame[data-os='android'][data-preview-theme='dark'] .phone-home-bar {
+  background: #000000;
+}
+
+.phone-frame[data-os='android'][data-preview-theme='dark'] .phone-home-bar span {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.phone-frame[data-os='android'][data-preview-theme='dark'] .and-view-navbar {
+  color: #f1f3f4;
+}
+
+.phone-frame[data-os='android'][data-preview-theme='dark'] .and-view-hero {
+  background: #000000;
+  box-shadow: none;
+  padding: 6px 4px 12px;
+}
+
+.phone-frame[data-os='android'][data-preview-theme='dark'] .and-view-name {
+  color: #ffffff;
+}
+
+.phone-frame[data-os='android'][data-preview-theme='dark'] .and-view-primary-tel {
+  color: #d1d5db;
+}
+
+.phone-frame[data-os='android'][data-preview-theme='dark'] .and-view-primary-tel strong {
+  color: #ffffff;
+}
+
+.phone-frame[data-os='android'][data-preview-theme='dark'] .and-view-chev {
+  background: #2c2e33;
+  color: #d1d5db;
+}
+
+.phone-frame[data-os='android'][data-preview-theme='dark'] .and-view-act-btn {
+  background: #1c1d21;
+}
+
+.phone-frame[data-os='android'][data-preview-theme='dark'] .and-view-act-btn.is-call { color: #22c55e; }
+.phone-frame[data-os='android'][data-preview-theme='dark'] .and-view-act-btn.is-chat { color: #38bdf8; }
+.phone-frame[data-os='android'][data-preview-theme='dark'] .and-view-act-btn.is-video { background: #facc15; color: #ffffff; }
+.phone-frame[data-os='android'][data-preview-theme='dark'] .and-view-act-btn.is-mail { color: #d1d5db; }
+
+.phone-frame[data-os='android'][data-preview-theme='dark'] .and-view-card {
+  background: #16171a;
+  box-shadow: none;
+}
+
+.phone-frame[data-os='android'][data-preview-theme='dark'] .and-view-row {
+  border-bottom-color: #26282d;
+}
+
+.phone-frame[data-os='android'][data-preview-theme='dark'] .and-view-row-lbl {
+  color: #9aa0a6;
+}
+
+.phone-frame[data-os='android'][data-preview-theme='dark'] .and-view-row-val {
+  color: #f1f3f4;
+}
+
+.phone-frame[data-os='android'][data-preview-theme='dark'] .and-mini-ico.is-call { color: #22c55e; }
+.phone-frame[data-os='android'][data-preview-theme='dark'] .and-mini-ico.is-chat { color: #38bdf8; }
+.phone-frame[data-os='android'][data-preview-theme='dark'] .and-mini-ico.is-video { background: #facc15; color: #ffffff; }
+.phone-frame[data-os='android'][data-preview-theme='dark'] .and-mini-ico.is-outline { color: #9aa0a6; }
+
+.phone-frame[data-os='android'][data-preview-theme='dark'] .phone-empty-note {
+  background: #16171a;
+  border-color: #2c2e33;
+  color: #9aa0a6;
+}
+
+/* ══════════════════════════════════════════════════
+   FULLSCREEN QR MODAL
+   ══════════════════════════════════════════════════ */
+.qr-fs-modal {
+  border: none;
+  padding: 0;
+  margin: 0;
+  width: 100vw;
+  max-width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+
+.qr-fs-modal::backdrop {
+  background: rgba(2, 6, 23, 0.85);
+}
+
+.qr-fs-inner {
+  height: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 14px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.qr-fs-topbar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   flex-shrink: 0;
 }
 
-.phone-frame[data-os="android"] .phone-empty-note {
+.qr-fs-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.qr-fs-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 16px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.qr-fs-code-box {
+  width: min(76vw, 44dvh, 340px);
+  aspect-ratio: 1 / 1;
   background: #ffffff;
-  border: 1px dashed #c4c7c5;
-  color: #5f6368;
+  border-radius: 16px;
+  padding: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
 }
 
-.phone-frame[data-os="android"] .phone-omitted-note {
-  background: #fff8e1;
-  border: 1px solid #ffe082;
-  color: #b26a00;
+.qr-fs-code-box svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  shape-rendering: crispEdges;
 }
 
-/* Responsive adjustments */
+.qr-fs-details {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 14px;
+  text-align: center;
+  flex-shrink: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.qr-fs-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.25;
+}
+
+.qr-fs-company {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-top: 2px;
+}
+
+.qr-fs-rows {
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.qr-fs-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12.5px;
+}
+
+.qr-fs-lbl {
+  color: var(--text-soft);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.qr-fs-val {
+  color: var(--text);
+  font-weight: 500;
+  text-align: right;
+  word-break: break-word;
+}
+
+/* Mobile-only bottom Save-to-Phone button (hidden on desktop) */
+.mobile-save-phone-wrap {
+  display: none;
+}
+
 /* ══════════════════════════════════════════════════
    RESPONSIVE — tablet / mobile
    ══════════════════════════════════════════════════ */
@@ -1322,26 +1709,22 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
 /* ── 980px: tablet / stacked ── */
 @media (max-width: 980px) {
   .workspace {
-    /* Single-column flex: QR top → Form middle → Preview bottom */
     display: flex;
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
   }
 
-  /* Reset explicit grid placement and stretch full width */
   .form-grid, .qr-panel, .phone-preview-card {
     grid-column: unset;
     grid-row: unset;
     width: 100%;
   }
 
-  /* Order: 1=QR, 2=Form, 3=Preview */
   .qr-panel           { order: 1; }
   .form-grid          { order: 2; }
   .phone-preview-card { order: 3; }
 
-  /* All form group cards span full width */
   .span-4, .span-6 { grid-column: span 12; }
 
   .addresses-split,
@@ -1350,50 +1733,113 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
   }
 }
 
-/* ── 768px: mobile — QR compact, form scrolls, preview at bottom ── */
+/* ── 768px: mobile — topbar scrolls up, ONLY QR pinned top (~1/4 screen), form fills screen, preview at bottom ── */
 @media (max-width: 768px) {
   html, body {
-    height: 100%;
-    overflow: hidden;
+    height: auto;
+    min-height: 100%;
+    overflow: visible;
+    overflow-x: clip;
   }
 
   .app-shell {
-    height: 100vh;  /* fallback for older browsers */
-    height: 100dvh;
-    min-height: unset;
-    overflow: hidden;
-    padding: 6px 8px 0;
-    gap: 6px;
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible;
+    padding: 8px 8px 16px;
+    gap: 8px;
   }
 
+  /* Element 1: Topbar scrolls away upward */
   .topbar {
-    flex-shrink: 0;
-    padding: 6px 10px;
-    overflow-x: auto;
-    flex-wrap: nowrap;
+    position: static;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 7px;
+    padding: 8px 10px;
+  }
+
+  .brand {
+    gap: 8px;
+  }
+
+  .brand-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+  }
+
+  .brand-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .title-full { display: none; }
+  .title-short { display: inline; font-size: 15px; }
+  .subtitle { display: none; }
+
+  .topbar-actions {
+    gap: 5px;
+  }
+
+  .topbar .btn {
+    height: 28px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+
+  .mode-btn {
+    height: 24px;
+    padding: 0 9px;
+    font-size: 11px;
+  }
+
+  .theme-controls-group .btn-theme {
+    height: 27px;
+    padding: 0 7px;
+    font-size: 11px;
+  }
+
+  .saved-group {
+    border-right: none;
+    padding-right: 0;
+    margin-right: 0;
+  }
+
+  .saved-select {
+    height: 28px;
+    font-size: 11.5px;
+    max-width: 155px;
+    min-width: 115px;
   }
 
   .workspace {
-    flex: 1;
-    min-height: 0;      /* crucial: allows children to shrink below content size */
-    overflow: hidden;
-    gap: 6px;
+    flex: none;
+    height: auto;
+    overflow: visible;
+    gap: 8px;
   }
 
-  /* ── QR panel: compact strip at top ── */
+  /* Element 2: ONLY QR card stays sticky on top (~1/4 of mobile screen) */
   .qr-panel {
-    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: var(--bg);
+    padding: 4px 0;
+    margin: -4px 0;
   }
 
   .qr-card {
     display: grid;
     grid-template-columns: 112px minmax(0, 1fr);
     align-items: center;
-    gap: 5px 10px;
+    gap: 4px 10px;
     padding: 7px 9px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
   }
 
-  /* QR image: smaller but still scannable (112px) */
   .qr-stage {
     grid-column: 1;
     grid-row: 1 / 3;
@@ -1416,7 +1862,6 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
 
   .qr-card-header h2 { font-size: 12.5px; }
 
-  /* Right side of QR card: summary + actions */
   .qr-card-right {
     grid-column: 2;
     grid-row: 2;
@@ -1426,7 +1871,6 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
     gap: 5px;
   }
 
-  /* Hide verbose elements to save vertical space */
   .compat-row,
   .qr-metrics,
   #qr-subtitle { display: none; }
@@ -1442,20 +1886,17 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
   #btn-download-png { grid-column: span 2; font-size: 11px; height: 27px; }
   .qr-actions .btn-secondary { font-size: 10.5px; height: 25px; padding: 0 5px; }
 
-  /* ── Form: takes all remaining space, scrolls ── */
+  /* Element 3: Form fills full width and scrolls smoothly with document */
   .form-grid {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    align-content: start;
-    padding-bottom: 10px;
+    flex: none;
+    height: auto;
+    overflow: visible;
     width: 100%;
+    padding-bottom: 4px;
   }
 
-  /* Full-width fields on mobile */
   .cols-name  { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .cols-3     { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cols-3     { grid-template-columns: minmax(0, 1fr); }
   .cols-2     { grid-template-columns: minmax(0, 1fr); }
   .cols-addr  { grid-template-columns: minmax(0, 1fr); }
 
@@ -1471,60 +1912,60 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
   .field textarea { font-size: 16px; width: 100%; } /* prevents iOS zoom on focus */
   .field input    { height: 38px; }
 
-  /* ── Phone preview: compact strip at bottom ── */
+  /* Element 4: Phone preview at very bottom below all inputs (only seen when scrolling all the way down) */
   .phone-preview-card {
-    flex-shrink: 0;
-    max-height: 28vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    padding: 6px 10px;
+    flex: none;
+    max-height: none;
+    overflow: visible;
+    width: 100%;
+    padding: 10px;
   }
 
-  .phone-preview-head { margin-bottom: 4px; }
-  .phone-preview-head h2 { font-size: 12px; }
+  .phone-preview-head { margin-bottom: 6px; }
+  .phone-preview-head h2 { font-size: 13px; }
   .phone-preview-head p  { display: none; }
 
   .phone-frame {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    border-radius: 14px;
+    max-height: none;
+    overflow: hidden;
+    border-radius: 20px;
   }
 
-  .phone-screen { min-height: 90px; }
+  .phone-screen { min-height: 160px; }
 
-  /* ── Footer ── */
+  /* Element 5: Mobile-only Save Contact to Phone button at very bottom */
+  .mobile-save-phone-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    padding: 4px 0 2px;
+  }
+
+  .btn-save-to-phone {
+    width: 100%;
+    height: 44px;
+    font-size: 14px;
+    border-radius: 12px;
+  }
+
+  .mobile-save-phone-hint {
+    margin: 0;
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.35;
+  }
+
   .app-footer {
-    flex-shrink: 0;
-    padding: 3px 0 5px;
-    margin-top: 0;
+    padding: 8px 0 6px;
+    margin-top: 2px;
     text-align: center;
   }
 
   .date-picker-overlay {
     width: 36px !important;
     height: 36px !important;
-  }
-}
-
-/* ── 660px: very small phones — topbar compact ── */
-@media (max-width: 660px) {
-  .topbar {
-    padding: 5px 8px;
-  }
-  .topbar-actions { gap: 4px; }
-
-  .saved-group {
-    border-right: none;
-    padding-right: 0;
-    margin-right: 0;
-  }
-
-  .saved-select {
-    max-width: 130px;
-    min-width: 100px;
   }
 }
 
@@ -1549,6 +1990,7 @@ body:not([data-view-mode="advanced"]) [data-advanced-only] {
   .compat-row,
   .qr-actions,
   .phone-preview-card,
+  .mobile-save-phone-wrap,
   .app-footer {
     display: none !important;
   }
